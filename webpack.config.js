@@ -1,5 +1,8 @@
 const path = require('path');
+const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 
 module.exports = {
   context: path.resolve(__dirname, 'src'),
@@ -12,12 +15,51 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, `public`),
     open: true,
-    port: 8000,
+    hot: true,
+    port: 8090,
   },
 
   plugins: [
+    new webpack.HotModuleReplacementPlugin(),
+    new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
-      remplate: './index.js',
+      template: './index.html',
+    }),
+    new MiniCssExtractPlugin({
+      filename: '[name].css'
     })
-  ]
+  ],
+  module: {
+    rules: [{
+      test: /\.js$/,
+      exclude: /node_modules/,
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ['@babel/preset-env']
+          }
+        }
+    }, {
+      test: /\.(s[ac]ss)$/,
+      use: [{
+        loader: MiniCssExtractPlugin.loader,
+        options: {
+          publicPath: ''
+        }
+      }, {
+        loader: 'css-loader'
+      }, {
+        loader: 'postcss-loader',
+        options: {
+          postcssOptions: {
+            plugins: [
+              require('autoprefixer')
+            ]
+          }
+        }
+      }, {
+        loader: 'sass-loader'
+      }]
+    }]
+  }
 }

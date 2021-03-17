@@ -1,1 +1,1 @@
-console.log('asdawd')
+import "./sass/blocks/header.scss";
