@@ -4,8 +4,14 @@
   "description": "home js project",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "webpack serve --mode development"
   },
   "author": "Sergey Lysenko",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "html-webpack-plugin": "5.3.1",
+    "webpack": "5.26.2",
+    "webpack-cli": "4.5.0",
+    "webpack-dev-server": "3.11.2"
+  }
 }
