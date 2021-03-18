@@ -15,12 +15,12 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, `public`),
     open: true,
-    hot: true,
+    // hot: true,
     port: 8090,
   },
 
   plugins: [
-    new webpack.HotModuleReplacementPlugin(),
+    // new webpack.HotModuleReplacementPlugin(),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './index.html',
@@ -40,7 +40,7 @@ module.exports = {
           }
         }
     }, {
-      test: /\.(s[ac]ss)$/,
+      test: /\.(css)$/,
       use: [{
         loader: MiniCssExtractPlugin.loader,
         options: {
@@ -53,12 +53,11 @@ module.exports = {
         options: {
           postcssOptions: {
             plugins: [
-              require('autoprefixer')
+              require('tailwindcss'),
+              require('autoprefixer'),
             ]
           }
         }
-      }, {
-        loader: 'sass-loader'
       }]
     }]
   }

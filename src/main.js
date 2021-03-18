@@ -1,1 +1,1 @@
-import "./sass/blocks/header.scss";
+import "tailwindcss/tailwind.css"
