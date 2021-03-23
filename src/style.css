@@ -1,0 +1,25 @@
+.favorite:checked + svg {
+  transform: scale(1.2);
+}
+
+.favorite:checked + svg path {
+  stroke: rgba(217, 119, 6, 1);
+}
+
+.favorite + svg {
+  transition: .3s transform ease-in-out;
+}
+
+.favorite + svg path,
+.like + svg {
+  transition: .3s all ease-in-out;
+}
+
+.like:checked + svg {
+  transform: scale(1.2);
+  fill: rgba(220, 38, 38, 1);
+}
+
+.load-picture:hover svg {
+  transform: rotate(180deg);
+}

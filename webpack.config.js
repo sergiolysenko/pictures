@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const tailwind = require('tailwindcss');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
@@ -40,7 +41,7 @@ module.exports = {
           }
         }
     }, {
-      test: /\.(css)$/,
+      test: /\.css$/,
       use: [{
         loader: MiniCssExtractPlugin.loader,
         options: {
@@ -53,10 +54,18 @@ module.exports = {
         options: {
           postcssOptions: {
             plugins: [
-              require('tailwindcss'),
+              tailwind('./tailwind.config.js'),
               require('autoprefixer'),
             ]
           }
+        }
+      }]
+    }, {
+      test: /\.(png|jpe?g|webp)$/,
+      use: [{
+        loader: 'file-loader',
+        options: {
+          name: '[path][name].[ext]',
         }
       }]
     }]
