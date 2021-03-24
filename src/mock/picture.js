@@ -26,3 +26,17 @@ export const createPictureMock = () => {
     likes: getRandomNumber(0, 8000),
   }
 }
+
+export const readyPictures = [{
+  id: 100,
+  src: "./img/picture-1.jpg",
+  title: "My favorite picture",
+  author: "James",
+  likes: 0,
+}, {
+  id: 101,
+  src: "./img/picture-2.jpg",
+  title: "My liked picture",
+  author: "Joseph",
+  likes: 1,
+}]

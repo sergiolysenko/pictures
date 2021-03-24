@@ -19,9 +19,11 @@ const comments = [
 
 export const generateComment = () => {
   return {
+    id: Math.floor(Math.random() * 1000000),
     avatar: avatars[getRandomNumber(0, avatars.length - 1)],
     author: authors[getRandomNumber(0, authors.length - 1)],
     text: comments[getRandomNumber(0, authors.length - 1)],
     time: new Date(),
+    likeCount: Math.floor(Math.random() * 100),
   }
 }

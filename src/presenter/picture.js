@@ -1,22 +1,24 @@
 import {CommentsButtonView} from "../view/show-comments.js";
-import {CommentView} from "../view/comment.js";
 import {CommentsSectionView} from "../view/comments.js";
+import {CommentPresenter} from "./comment.js";
 import {PictureView} from "../view/picture.js";
 import {SocialBlockView} from "../view/social-block.js";
 import {ShowMoreCommentsView} from "../view/show-more-comments.js";
 import {render, remove, RenderPosition} from "../utils/render.js";
+import {UpdateType, UserAction} from "../const.js";
 
 const COMMENTS_COUNT_PER_STEP = 3;
 
 export class PicturePresenter {
-  constructor(picturesContainer, changeMode) {
+  constructor(picturesContainer, changeMode, changePicture) {
     this._picturesContainer = picturesContainer;
     this._changeMode = changeMode;
-    this._isCommentsOpen = false;
+    this._changePicture = changePicture;
+    this._commentPresenter = {};
     this._renderedCommentsCount = COMMENTS_COUNT_PER_STEP;
+    this._isCommentsOpen = false;
 
     this._commentsButtonComponent = null;
-    this._commentsSectionComponent = null;
     this._showMoreCommentsComponent = null;
     this._pictureComponent = null;
     this._socialBlockComponent = null;
@@ -25,6 +27,8 @@ export class PicturePresenter {
 
     this._handleCommentsClick = this._handleCommentsClick.bind(this);
     this._handleShowMoreCommentsClick = this._handleShowMoreCommentsClick.bind(this);
+    this._handleLikeClick = this._handleLikeClick.bind(this);
+    this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
   }
 
   init(picture, comments) {
@@ -42,12 +46,16 @@ export class PicturePresenter {
     render(this._picturesContainer, this._pictureComponent, RenderPosition.BEFOREEND);
     render(this._socialBlockContainer, this._socialBlockComponent, RenderPosition.BEFOREEND);
     render(this._socialBlockContainer, this._commentsButtonComponent, RenderPosition.BEFOREEND);
+
+    this._socialBlockComponent.setLikeClickHandler(this._handleLikeClick);
+    this._socialBlockComponent.setFavoriteClickHandler(this._handleFavoriteClick);
   }
 
   resetView() {
     this._commentsButtonComponent.updateData({isCommentsOpen: false});
-    this._clearCommentsSection();
     this._isCommentsOpen = false;
+    this._renderedCommentsCount = COMMENTS_COUNT_PER_STEP;
+    this._clearCommentsSection();
   }
 
   _handleCommentsClick() {
@@ -57,18 +65,29 @@ export class PicturePresenter {
       this._changeMode();
       this._renderCommentsSection();
     }
+
     this._isCommentsOpen = !this._isCommentsOpen;
   }
 
-  _renderComment(comment) {
-    this._commentsContainer = this._commentsSectionComponent.getElement().querySelector('.comments-list');
-
-    const commentComponent = new CommentView(comment);
-    render(this._commentsContainer, commentComponent, RenderPosition.BEFOREEND)
+  _handleLikeClick(update) {
+    this._changePicture(
+        UserAction.UPDATE_PICTURE,
+        UpdateType.NONE,
+        update
+    );
+    this._changePicture(
+      UserAction.UPDATE_USER_LIKE,
+      UpdateType.NONE,
+      update
+    );
   }
 
-  _renderComments(comments) {
-    comments.forEach((comment) => this._renderComment(comment))
+  _handleFavoriteClick(update) {
+    this._changePicture(
+      UserAction.UPDATE_USER_FAVORITE,
+      UpdateType.NONE,
+      update
+    );
   }
 
   _handleShowMoreCommentsClick() {
@@ -82,6 +101,19 @@ export class PicturePresenter {
     if (this._renderedCommentsCount >= commentsCount) {
       remove(this._showMoreCommentsComponent);
     }
+  }
+
+  _renderComment(comment) {
+    this._commentsContainer = this._commentsSectionComponent.getElement().querySelector('.comments-list');
+
+    const commentPresenter = new CommentPresenter(this._commentsContainer);
+
+    commentPresenter.init(comment);
+    this._commentPresenter[comment.id] = commentPresenter;
+  }
+
+  _renderComments(comments) {
+    comments.forEach((comment) => this._renderComment(comment))
   }
 
   _renderShowMoreCommentsButton() {
@@ -98,8 +130,16 @@ export class PicturePresenter {
   }
 
   _clearCommentsSection() {
+    if(!this._commentsSectionComponent) {
+      return;
+    }
+
+    Object.values(this._commentPresenter)
+      .forEach((presenter) => presenter.destroy());
     remove(this._commentsSectionComponent);
-    // У каждого презентера коммента вызывается метод дестрой который все чистит. Список презентеров будет также создаваться при рендаре.
+    remove(this._showMoreCommentsComponent);
+
+    this._commentPresenter = {};
   }
 
   _renderCommentsSection() {

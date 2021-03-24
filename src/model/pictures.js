@@ -1,7 +1,6 @@
-
 import {Observer} from "../utils/observer.js";
 
-export class PictureModel extends Observer {
+export class PicturesModel extends Observer {
   constructor() {
     super();
     this._pictures = [];
@@ -17,7 +16,7 @@ export class PictureModel extends Observer {
     return this._pictures;
   }
 
-  updatePicture(updaeType, update) {
+  updatePicture(updateType, update) {
     const index = this._pictures.findIndex((picture) => picture.id === update.id);
 
     if (index === -1) {
