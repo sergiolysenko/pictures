@@ -1,3 +1,4 @@
+import {NewPicturePresenter} from "./new-picture.js";
 import {PicturePresenter} from "./picture.js";
 import {UserAction, UpdateType} from "../const.js";
 
@@ -11,10 +12,16 @@ export class BoardPresenter {
 
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
+
+    this._newPicturePresenter = new NewPicturePresenter(this._boardContainer, this._handleViewAction, this._userModel);
   }
 
   init() {
     this._renderBoard();
+  }
+
+  createPicture(callback) {
+    this._newPicturePresenter.init(callback);
   }
 
   _handleModeChange() {
@@ -57,6 +64,10 @@ export class BoardPresenter {
 
       case UserAction.UPDATE_USER_LIKE:
         this._userModel.updateLiked(updateType, update);
+        break;
+
+      case UserAction.LOAD_PICTURE:
+        this._pictureModel.loadPicture(updateType, update);
         break;
     }
   }

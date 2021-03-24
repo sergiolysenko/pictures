@@ -10,31 +10,45 @@ import {createPictureMock, readyPictures} from "./mock/picture.js";
 import {userData} from "./mock/user.js";
 import {generateComment} from "./mock/comment.js";
 import {PicturesModel} from "./model/pictures.js";
-import {UpdateType} from "./const.js";
+import {UpdateType, MenuItem} from "./const.js";
 import {UserModel} from "./model/user.js";
+import {SiteHeaderView} from "./view/site-header";
 
-const userMenuButton = document.querySelector('.user-menu__button');
-const menu = document.querySelector('.user-menu__list');
-
-const toggleUserList = () => {
-  menu.hidden = !menu.hidden;
-}
-userMenuButton.addEventListener('click', () => {
-  toggleUserList();
-})
-
-// RENDER PICTURES BOARD //
+// MOCKS ///
 let pictures = new Array(15).fill("").map((item) => item = createPictureMock());
 pictures = readyPictures.concat(pictures);
 
 const comments = new Array(10).fill("").map((item) => item = generateComment());
 
+// RENDER PICTURES BOARD //
 const userModel = new UserModel();
 const picturesModel = new PicturesModel();
 picturesModel.setPictures(UpdateType.INIT, pictures);
 userModel.init(userData);
+const siteHeaderView = new SiteHeaderView(userModel.getUser());
 
+const handleNewTaskClose = () => {
+  siteHeaderView.getElement().querySelector('.load-picture').disabled = false;
+};
+
+const handleSiteHeaderClick = (menuItem) => {
+  switch (menuItem) {
+    case MenuItem.LOAD_PICTURE:
+      boardPresenter.createPicture(handleNewTaskClose);
+      break;
+  }
+};
+
+
+const headerContainer = document.querySelector('.header');
 const picturesListContainer = document.querySelector('.pictures-list');
+
+
+siteHeaderView.setLoadPictureClickHandler(handleSiteHeaderClick);
+
 const boardPresenter = new BoardPresenter(picturesListContainer, picturesModel, comments, userModel);
 
+render(headerContainer, siteHeaderView, RenderPosition.BEFOREEND);
 boardPresenter.init();
+
+

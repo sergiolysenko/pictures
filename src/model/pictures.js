@@ -32,7 +32,7 @@ export class PicturesModel extends Observer {
     this._notify(updateType, update);
   }
 
-  addPicture(updateType, update) {
+  loadPicture(updateType, update) {
     this._pictures = [
       update,
       ...this._pictures
