@@ -1,7 +1,7 @@
 import {AbstractView} from "./abstract.js";
 
 const createShowMoreComments = () => {
-  return `<div class="flex justify-center pt-3 mb-3">
+  return `<div class="flex justify-center mb-3">
       <button class="show-more-comments font-medium text-sm" type="button">Show more comments</button>
     </div>`
 }

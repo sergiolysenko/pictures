@@ -32,7 +32,7 @@ export class CommentsModel extends Observer {
     this._notify(updateType, update);
   }
 
-  loadComment(updateType, update) {
+  addComment(updateType, update) {
     this._comments = [
       update,
       ...this._comments
