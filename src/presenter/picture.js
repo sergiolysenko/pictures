@@ -5,14 +5,14 @@ import {SocialBlockView} from "../view/social-block.js";
 import {render, remove, RenderPosition} from "../utils/render.js";
 import {UpdateType, UserAction} from "../const.js";
 import {CommentsSectionPresenter} from "./comments.js";
-import {allComments} from "../mock/comment.js";
 import {CommentsModel} from "../model/comments.js";
 
 export class PicturePresenter {
-  constructor(picturesContainer, changeMode, changePicture) {
+  constructor(picturesContainer, changeMode, changePicture, userModel) {
     this._picturesContainer = picturesContainer;
     this._changeMode = changeMode;
     this._changePicture = changePicture;
+    this._userModel = userModel;
 
     this._isCommentsOpen = false;
 
@@ -103,7 +103,7 @@ export class PicturePresenter {
 
   _renderCommentsSection() {
     const commentsContainer = this._commentsContainerComponent.getElement();
-    this._commentsSectionPresenter = new CommentsSectionPresenter(commentsContainer, this._commentsModel);
+    this._commentsSectionPresenter = new CommentsSectionPresenter(commentsContainer, this._commentsModel, this._userModel);
     this._commentsSectionPresenter.init(this._picture);
   }
 }

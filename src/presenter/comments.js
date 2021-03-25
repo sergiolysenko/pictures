@@ -4,20 +4,21 @@ import {ShowMoreCommentsView} from "../view/show-more-comments.js";
 import {render, remove, RenderPosition} from "../utils/render.js";
 import {UpdateType, UserAction} from "../const.js";
 import {allComments} from "../mock/comment.js";
-import { CommentView } from "../view/comment.js";
+import {CommentView} from "../view/comment.js";
 
 const COMMENTS_COUNT_PER_STEP = 3;
 
 export class CommentsSectionPresenter {
-  constructor(commentsSectionContainer, commentsModel) {
+  constructor(commentsSectionContainer, commentsModel, userModel) {
     this._commentsSectionContainer = commentsSectionContainer;
     this._commentsModel = commentsModel;
+    this._userModel = userModel;
     this._renderedCommentsCount = COMMENTS_COUNT_PER_STEP;
     this._commentComponent = {};
 
-    this._noCommentsComponent = new NoCommentsView();
+    this._noCommentsComponent = null;
+    this._commentsSectionComponent = null;
     this._showMoreCommentsComponent = new ShowMoreCommentsView();
-    this._commentsSectionComponent = new CommentsSectionView();
 
     this._handleShowMoreCommentsClick = this._handleShowMoreCommentsClick.bind(this);
     this._handleCommentsViewAction = this._handleCommentsViewAction.bind(this);
@@ -39,10 +40,21 @@ export class CommentsSectionPresenter {
     Object.values(this._commentComponent)
       .forEach((component) => remove(component));
     remove(this._noCommentsComponent);
-    remove(this._commentsSectionComponent);
     remove(this._showMoreCommentsComponent);
+    remove(this._commentsSectionComponent);
     this._commentsModel.removeObserver(this._handleCommentsModelEvent);
     this._commentComponent = {};
+  }
+
+  _cleanComments() {
+    Object.values(this._commentComponent)
+      .forEach((component) => remove(component));
+
+    remove(this._commentsSectionComponent);
+
+    if (this._noCommentsComponent !== null) {
+      remove(this._noCommentsComponent);
+    }
   }
 
   _loadPictureComments(currentPicture) {
@@ -67,6 +79,7 @@ export class CommentsSectionPresenter {
         break;
 
       case UserAction.ADD_COMMENT:
+        update = CommentsSectionPresenter.addUserDataToComment(this._userModel.getUser(), update);
         this._commentsModel.addComment(updateType, update);
         break;
     }
@@ -78,7 +91,8 @@ export class CommentsSectionPresenter {
         this._picturePresenter[data.id].init(data);
         break;
       case UpdateType.MAJOR:
-        console.log(123)
+        this._cleanComments();
+        this._renderCommentsSection();
         break;
       case UpdateType.INIT:
         this._renderCommentsSection();
@@ -125,12 +139,15 @@ export class CommentsSectionPresenter {
   }
 
   _renderCommentsSection() {
+    this._commentsSectionComponent = new CommentsSectionView();
+    this._commentsSectionComponent.setSubmitHandler(this._handleCommentsViewAction);
     render(this._commentsSectionContainer, this._commentsSectionComponent, RenderPosition.BEFOREEND);
 
     this._comments = this._commentsModel.getComments();
     const commentsCount = this._comments.length;
 
     if(!commentsCount) {
+      this._noCommentsComponent = new NoCommentsView();
       this._renderNoComments();
     }
 
@@ -140,6 +157,12 @@ export class CommentsSectionPresenter {
       this._renderShowMoreCommentsButton();
     }
   }
-}
 
-// Вернуть все состояние обновление сюда
+  static addUserDataToComment(user, comment) {
+    return Object.assign({}, comment, {
+      author: user.name,
+      avatar: user.avatar,
+      time: new Date(),
+    })
+  }
+}

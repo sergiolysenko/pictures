@@ -3,7 +3,7 @@ import {NewPictureView} from "../view/new-picture.js";
 import {UserAction, UpdateType} from "../const.js";
 
 export class NewPicturePresenter {
-  constructor(picturesContainer, changeData, userModel) {
+  constructor(picturesContainer, changeData) {
     this._picturesContainer = picturesContainer;
     this._changeData = changeData;
     this._newPictureComponent = null;

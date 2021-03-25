@@ -69,8 +69,8 @@ export class NewPictureView extends Smart {
 
   restoreHandlers() {
     this._setInnerHandlers();
-    this.setSubmitHandler(this._callback.submit)
-    this.setCancelClickHandler(this._callback.cancelClick)
+    this.setSubmitHandler(this._callback.submit);
+    this.setCancelClickHandler(this._callback.cancelClick);
   }
 
   _setInnerHandlers() {

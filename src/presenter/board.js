@@ -14,7 +14,7 @@ export class BoardPresenter {
     this._handleModelEvent = this._handleModelEvent.bind(this);
 
     this._pictureModel.addObserver(this._handleModelEvent);
-    this._newPicturePresenter = new NewPicturePresenter(this._boardContainer, this._handleViewAction, this._userModel);
+    this._newPicturePresenter = new NewPicturePresenter(this._boardContainer, this._handleViewAction);
   }
 
   init() {
@@ -33,7 +33,7 @@ export class BoardPresenter {
   }
 
   _renderPicture(picture) {
-    const picturePresenter = new PicturePresenter(this._boardContainer, this._handleModeChange, this._handleViewAction);
+    const picturePresenter = new PicturePresenter(this._boardContainer, this._handleModeChange, this._handleViewAction, this._userModel);
 
     picturePresenter.init(picture);
     this._picturePresenter[picture.id] = picturePresenter;
