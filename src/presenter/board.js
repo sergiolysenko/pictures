@@ -12,7 +12,9 @@ export class BoardPresenter {
 
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
+    this._handleModelEvent = this._handleModelEvent.bind(this);
 
+    this._pictureModel.addObserver(this._handleModelEvent);
     this._newPicturePresenter = new NewPicturePresenter(this._boardContainer, this._handleViewAction, this._userModel);
   }
 
@@ -22,6 +24,7 @@ export class BoardPresenter {
 
   createPicture(callback) {
     this._newPicturePresenter.init(callback);
+    this._handleModeChange();
   }
 
   _handleModeChange() {
@@ -37,18 +40,27 @@ export class BoardPresenter {
     this._picturePresenter[picture.id] = picturePresenter;
   }
 
-  _renderPictures() {
+  _renderPictures(pictures) {
+    pictures.forEach((picture) => this._renderPicture(picture));
+  }
+
+  _renderBoard() {
     const pictures = this._pictureModel.getPictures();
     const user = this._userModel.getUser();
 
     const boardPictures = BoardPresenter
       .parseUserPicturesToBoardData(user, pictures);
 
-    boardPictures.forEach((picture) => this._renderPicture(picture));
+    this._renderPictures(boardPictures);
   }
 
-  _renderBoard() {
-    this._renderPictures(this._pictures);
+  _clearBoard() {
+    this._newPicturePresenter.destroy();
+
+    Object.values(this._picturePresenter)
+      .forEach((presenter) => presenter.destroy());
+
+    this._picturePresenter = {};
   }
 
   _handleViewAction(actionType, updateType, update) {
@@ -67,9 +79,25 @@ export class BoardPresenter {
         break;
 
       case UserAction.LOAD_PICTURE:
+        const currentUser = this._userModel.getUser();
+        update = BoardPresenter.adaptNewPictureToBoard(currentUser, update);
         this._pictureModel.loadPicture(updateType, update);
+        console.log(this._pictureModel.getPictures())
         break;
     }
+  }
+
+  _handleModelEvent(updateType, data) {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this._picturePresenter[data.id].init(data);
+        break;
+      case UpdateType.MAJOR:
+        this._clearBoard();
+        this._renderBoard();
+        break;
+    }
+
   }
 
   static parseUserPicturesToBoardData(user, pictures) {
@@ -90,7 +118,10 @@ export class BoardPresenter {
 
     return adaptedPicture;
   }
-}
 
-// При клиле на лайк нужно записывать общее количество лайков в пикча модел и айди картинки в юзер модель.
-// Также с фаворитс
+  static adaptNewPictureToBoard(user, newPicture) {
+    return Object.assign({}, newPicture, {
+      author: user.name,
+    })
+  }
+}

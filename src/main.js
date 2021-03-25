@@ -39,7 +39,6 @@ const handleSiteHeaderClick = (menuItem) => {
   }
 };
 
-
 const headerContainer = document.querySelector('.header');
 const picturesListContainer = document.querySelector('.pictures-list');
 

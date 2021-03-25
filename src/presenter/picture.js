@@ -51,6 +51,13 @@ export class PicturePresenter {
     this._socialBlockComponent.setFavoriteClickHandler(this._handleFavoriteClick);
   }
 
+  destroy() {
+    this._clearCommentsSection();
+    remove(this._pictureComponent);
+    remove(this._commentsButtonComponent);
+    remove(this._socialBlockComponent);
+  }
+
   resetView() {
     this._commentsButtonComponent.updateData({isCommentsOpen: false});
     this._isCommentsOpen = false;

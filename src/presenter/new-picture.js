@@ -12,8 +12,8 @@ export class NewPicturePresenter {
     this._handleCancelClick = this._handleCancelClick.bind(this);
   }
 
-  init(callback) {
-    this._callback = callback;
+  init(cancelCallback) {
+    this._cancelCallback = cancelCallback;
     if (this._newPictureComponent !== null) {
       return;
     }
@@ -27,7 +27,9 @@ export class NewPicturePresenter {
   }
 
   destroy() {
-    this._callback();
+    if (this._cancelCallback !== null) {
+      this._cancelCallback();
+    }
 
     if (this._newPictureComponent === null) {
       return;
@@ -44,8 +46,9 @@ export class NewPicturePresenter {
   _handleFormSubmit(picture) {
     this._changeData(
         UserAction.LOAD_PICTURE,
-        UpdateType.MINOR,
+        UpdateType.MAJOR,
         picture
     );
+    this.destroy();
   }
 }
