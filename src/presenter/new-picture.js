@@ -49,6 +49,5 @@ export class NewPicturePresenter {
         UpdateType.MAJOR,
         picture
     );
-    this.destroy();
   }
 }

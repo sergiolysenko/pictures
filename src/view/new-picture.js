@@ -1,8 +1,7 @@
 import {Smart} from "./smart.js";
-import {UserModel} from "../model/user.js";
 
 const BLANK_PICTURE = {
-  id: Math.floor(Math.random() * 100000),
+  id: "",
   src: "",
   title: "",
   author: "",
@@ -36,7 +35,9 @@ const createNewPictureTemplate = (picture) => {
             </div>
           </div>
           <div class="flex flex-row w-full">
-            <button type="submit" class="button-submit flex items-center justify-center mr-1 h-10 w-full rounded-3xl bg-gray-200 hover:bg-gray-300 text-indigo-800 text-white">
+            <button type="submit" class="button-submit flex items-center justify-center mr-1 h-10 w-full rounded-3xl bg-gray-200 hover:bg-gray-300 text-indigo-800 text-white"
+            ${src ? `` : `disabled`}
+            >
               Load
             </button>
             <button type="button" class="cancel-button flex items-center justify-center h-10 w-full rounded-3xl bg-red-500 hover:bg-red-600 text-indigo-800 text-white">
@@ -109,6 +110,7 @@ export class NewPictureView extends Smart {
           src: reader.result,
         })
       });
+
       reader.readAsDataURL(file);
     }
   }

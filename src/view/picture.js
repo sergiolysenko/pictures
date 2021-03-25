@@ -5,7 +5,7 @@ const createPictureTemplate = (picture) => {
   return `<section class="picture">
   <div class="grid">
     <div class="w-full h-80 relative">
-      <img src=${src} alt=${title} class="object-cover w-full h-full bg-gray-100 rounded-t-lg" />
+      <img src="${src}" alt="${title}" class="object-cover w-full h-full bg-gray-100 rounded-t-lg" />
       <div class="absolute bottom-0 z-10 w-full px-4 pt-40 pb-3 bg-gradient-to-t from-black">
         <p class="text-sm font-medium text-white">${author}</p>
         <h2 class="text-xl font-semibold text-white">${title}</h2>

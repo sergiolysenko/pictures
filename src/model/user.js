@@ -26,24 +26,23 @@ export class UserModel extends Observer {
     const index = userItemsID.findIndex((item) => item === newItemID);
 
     if (index === -1) {
-      userItemsID.push(newItemID);
-      return;
+      return userItemsID = [...userItemsID, newItemID];
     }
 
-    userItemsID = [
+    return userItemsID = [
       ...userItemsID.slice(0, index),
-      ...userItemsID.slice(0, index + 1),
+      ...userItemsID.slice(index + 1),
     ]
   }
 
   updateFavorites(updateType, update) {
-    this._update(this._user.favorites, update.id);
-
+    this._user.favorites = this._update(this._user.favorites, update.id);
+    console.log(this._user.favorites);
     this._notify(updateType, update);
   }
 
   updateLiked(updateType, update) {
-    this._update(this._user.liked, update.id);
+    this._user.liked = this._update(this._user.liked, update.id);
 
     this._notify(updateType, update);
   }

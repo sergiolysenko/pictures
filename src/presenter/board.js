@@ -82,7 +82,6 @@ export class BoardPresenter {
         const currentUser = this._userModel.getUser();
         update = BoardPresenter.adaptNewPictureToBoard(currentUser, update);
         this._pictureModel.loadPicture(updateType, update);
-        console.log(this._pictureModel.getPictures())
         break;
     }
   }
@@ -121,6 +120,7 @@ export class BoardPresenter {
 
   static adaptNewPictureToBoard(user, newPicture) {
     return Object.assign({}, newPicture, {
+      id: Math.floor(Math.random() * 100000),
       author: user.name,
     })
   }
