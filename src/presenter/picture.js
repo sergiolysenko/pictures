@@ -1,11 +1,15 @@
 import {CommentsButtonView} from "../view/show-comments.js";
 import {CommentsSectionView} from "../view/comments.js";
+import {CommentsContainerView} from "../view/comments-container.js";
+import {CommentsModel} from "../model/comments.js";
 import {CommentPresenter} from "./comment.js";
+import {NoCommentsView} from "../view/no-comments.js";
 import {PictureView} from "../view/picture.js";
 import {SocialBlockView} from "../view/social-block.js";
 import {ShowMoreCommentsView} from "../view/show-more-comments.js";
 import {render, remove, RenderPosition} from "../utils/render.js";
 import {UpdateType, UserAction} from "../const.js";
+import {allComments} from "../mock/comment.js";
 
 const COMMENTS_COUNT_PER_STEP = 3;
 
@@ -24,6 +28,7 @@ export class PicturePresenter {
     this._socialBlockComponent = null;
     this._socialBlockContainer = null;
     this._commentsContainer = null;
+    this._commentsModel = null;
 
     this._handleCommentsClick = this._handleCommentsClick.bind(this);
     this._handleShowMoreCommentsClick = this._handleShowMoreCommentsClick.bind(this);
@@ -31,22 +36,23 @@ export class PicturePresenter {
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
   }
 
-  init(picture, comments) {
+  init(picture) {
     this._picture = picture;
-    this._comments = comments;
 
     this._pictureComponent = new PictureView(this._picture);
     this._commentsButtonComponent = new CommentsButtonView();
+    this._noCommentsComponent = new NoCommentsView();
     this._socialBlockComponent = new SocialBlockView(this._picture);
+    this._commentsContainerComponent = new CommentsContainerView();
 
     this._socialBlockContainer = this._pictureComponent.getElement().querySelector('.social-block-wrapper');
-
-    this._commentsButtonComponent.setCommentsButtonHandler(this._handleCommentsClick);
 
     render(this._picturesContainer, this._pictureComponent, RenderPosition.BEFOREEND);
     render(this._socialBlockContainer, this._socialBlockComponent, RenderPosition.BEFOREEND);
     render(this._socialBlockContainer, this._commentsButtonComponent, RenderPosition.BEFOREEND);
+    render(this._socialBlockContainer, this._commentsContainerComponent, RenderPosition.BEFOREEND)
 
+    this._commentsButtonComponent.setCommentsButtonHandler(this._handleCommentsClick);
     this._socialBlockComponent.setLikeClickHandler(this._handleLikeClick);
     this._socialBlockComponent.setFavoriteClickHandler(this._handleFavoriteClick);
   }
@@ -98,9 +104,9 @@ export class PicturePresenter {
   }
 
   _handleShowMoreCommentsClick() {
-    const commentsCount = this._comments.length;
+    const commentsCount = this._commentsModel.getComments().length;
     const newRenderedCommentsCount = Math.min(commentsCount, this._renderedCommentsCount + COMMENTS_COUNT_PER_STEP);
-    const comments = this._comments.slice(this._renderedCommentsCount, newRenderedCommentsCount);
+    const comments = this._commentsModel.getComments().slice(this._renderedCommentsCount, newRenderedCommentsCount);
 
     this._renderComments(comments);
     this._renderedCommentsCount = newRenderedCommentsCount;
@@ -111,8 +117,6 @@ export class PicturePresenter {
   }
 
   _renderComment(comment) {
-    this._commentsContainer = this._commentsSectionComponent.getElement().querySelector('.comments-list');
-
     const commentPresenter = new CommentPresenter(this._commentsContainer);
 
     commentPresenter.init(comment);
@@ -149,12 +153,35 @@ export class PicturePresenter {
     this._commentPresenter = {};
   }
 
+  _getPictureComments() {
+    if (this._commentsModel === null) {
+      this._commentsModel = new CommentsModel();
+    }
+    const currentPictureComments = allComments
+      .filter((comments) => comments.pictureId === this._picture.id);
+
+    if(currentPictureComments.length) {
+      this._commentsModel.setComments(UpdateType.INIT, currentPictureComments[0].comments);
+    }
+
+    return this._commentsModel.getComments();
+  }
+
+  _renderNoComments() {
+    render(this._commentsContainer, this._noCommentsComponent, RenderPosition.AFTERBEGIN);
+  }
+
   _renderCommentsSection() {
     this._commentsSectionComponent = new CommentsSectionView();
+    this._commentsContainer = this._commentsSectionComponent.getElement().querySelector('.comments-list');
     render(this._socialBlockContainer, this._commentsSectionComponent, RenderPosition.BEFOREEND);
 
-    const comments = this._comments;
+    const comments = this._getPictureComments();
     const commentsCount = comments.length;
+
+    if(!commentsCount) {
+      this._renderNoComments();
+    }
 
     this._renderComments(comments.slice(0, Math.min(commentsCount, this._renderedCommentsCount)));
 

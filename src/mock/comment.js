@@ -17,7 +17,7 @@ const comments = [
   "The stars, the moon, and the sun are minor to me since you sparkle brighter than all of them", "Surely you would have been arrested if looking immensely beautiful was a crime."
 ]
 
-export const generateComment = () => {
+const generateComment = () => {
   return {
     id: Math.floor(Math.random() * 1000000),
     avatar: avatars[getRandomNumber(0, avatars.length - 1)],
@@ -27,3 +27,14 @@ export const generateComment = () => {
     likeCount: Math.floor(Math.random() * 100),
   }
 }
+
+const comments1 = new Array(5).fill("").map((item) => item = generateComment());
+const comments2 = new Array(7).fill("").map((item) => item = generateComment());
+
+export const allComments = [{
+  pictureId: 101,
+  comments: comments1,
+}, {
+  pictureId: 100,
+  comments: comments2,
+}]

@@ -57,7 +57,7 @@ export class CommentView extends AbstractView {
     this._comment = comment;
   }
 
-  getTemplate() {``
+  getTemplate() {
     return createComment(this._comment);
   }
 }

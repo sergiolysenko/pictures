@@ -37,7 +37,7 @@ export class UserModel extends Observer {
 
   updateFavorites(updateType, update) {
     this._user.favorites = this._update(this._user.favorites, update.id);
-    console.log(this._user.favorites);
+
     this._notify(updateType, update);
   }
 

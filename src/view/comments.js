@@ -1,8 +1,7 @@
 import {AbstractView} from "./abstract.js"
 
 const createCommentsSection = () => {
-  return `<div class="comments-section">
-    <div class="comments-list-wrapper">
+  return `<div class="comments-list-wrapper">
       <div class="comments-list pt-4">
       </div>
     </div>
@@ -20,8 +19,7 @@ const createCommentsSection = () => {
           </svg>
         </button>
       </div>
-    </div>
-  </div>`
+    </div>`
 }
 
 export class CommentsSectionView extends AbstractView {

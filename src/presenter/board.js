@@ -3,12 +3,11 @@ import {PicturePresenter} from "./picture.js";
 import {UserAction, UpdateType} from "../const.js";
 
 export class BoardPresenter {
-  constructor(boardContainer, pictureModel, comments, userModel) {
+  constructor(boardContainer, pictureModel, userModel) {
     this._boardContainer = boardContainer;
     this._picturePresenter = {};
     this._pictureModel = pictureModel;
     this._userModel = userModel;
-    this._comments = comments;
 
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
@@ -36,7 +35,7 @@ export class BoardPresenter {
   _renderPicture(picture) {
     const picturePresenter = new PicturePresenter(this._boardContainer, this._handleModeChange, this._handleViewAction);
 
-    picturePresenter.init(picture, this._comments);
+    picturePresenter.init(picture);
     this._picturePresenter[picture.id] = picturePresenter;
   }
 
@@ -96,7 +95,6 @@ export class BoardPresenter {
         this._renderBoard();
         break;
     }
-
   }
 
   static parseUserPicturesToBoardData(user, pictures) {

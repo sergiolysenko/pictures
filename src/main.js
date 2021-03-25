@@ -8,7 +8,7 @@ import {BoardPresenter} from "./presenter/board.js";
 import {render, RenderPosition} from "./utils/render.js";
 import {createPictureMock, readyPictures} from "./mock/picture.js";
 import {userData} from "./mock/user.js";
-import {generateComment} from "./mock/comment.js";
+import {allComments} from "./mock/comment.js";
 import {PicturesModel} from "./model/pictures.js";
 import {UpdateType, MenuItem} from "./const.js";
 import {UserModel} from "./model/user.js";
@@ -17,8 +17,6 @@ import {SiteHeaderView} from "./view/site-header";
 // MOCKS ///
 let pictures = new Array(15).fill("").map((item) => item = createPictureMock());
 pictures = readyPictures.concat(pictures);
-
-const comments = new Array(10).fill("").map((item) => item = generateComment());
 
 // RENDER PICTURES BOARD //
 const userModel = new UserModel();
@@ -45,7 +43,7 @@ const picturesListContainer = document.querySelector('.pictures-list');
 
 siteHeaderView.setLoadPictureClickHandler(handleSiteHeaderClick);
 
-const boardPresenter = new BoardPresenter(picturesListContainer, picturesModel, comments, userModel);
+const boardPresenter = new BoardPresenter(picturesListContainer, picturesModel, userModel);
 
 render(headerContainer, siteHeaderView, RenderPosition.BEFOREEND);
 boardPresenter.init();

@@ -37,7 +37,7 @@ export class PicturesModel extends Observer {
       update,
       ...this._pictures
     ];
-    console.log(this._pictures)
+
     this._notify(updateType, update);
   }
 }
