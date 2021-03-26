@@ -23,3 +23,8 @@
 .load-picture:hover svg {
   transform: rotate(180deg);
 }
+
+.comment-like:checked + small {
+  font-weight: bold;
+  text-decoration: underline;
+}

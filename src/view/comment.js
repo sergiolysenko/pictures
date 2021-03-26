@@ -1,5 +1,6 @@
-import {AbstractView} from "./abstract"
 import dayjs from "dayjs";
+import { Smart } from "./smart";
+import {UserAction, UpdateType} from "../const.js";
 
 const createComment = (comment) => {
   const {avatar, author, text, time, likeCount} = comment;
@@ -33,17 +34,16 @@ const createComment = (comment) => {
                 d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" />
               </svg>` : ``}
             </div>
-            <a href="#" class="ml-full hover:underline">
+            <label class="cursor-pointer hover:underline">
+              <input type="checkbox" href="#" class="comment-like hidden group">
               <small>Like</small>
-            </a>
+            </label>
             <small class="self-center">.</small>
             <a href="#" class="hover:underline">
               <small>Delete</small>
             </a>
             <small class="self-center">.</small>
-            <a href="#" class="hover:underline">
-              <small>${dayjs(time).format('DD.MM.YYYY')}</small>
-            </a>
+            <small>${dayjs(time).format('DD.MM.YYYY')}</small>
           </div>
         </div>
       </div>
@@ -51,13 +51,45 @@ const createComment = (comment) => {
   </div>`
 }
 
-export class CommentView extends AbstractView {
+export class CommentView extends Smart {
   constructor(comment) {
     super()
-    this._comment = comment;
+    this._data = comment;
+
+    this._likeClickHandler = this._likeClickHandler.bind(this);
   }
 
   getTemplate() {
-    return createComment(this._comment);
+    return createComment(this._data);
+  }
+
+  restoreHandlers() {
+    this.setLikeClickHandler(this._callback.likeClick);
+  }
+
+  _likeClickHandler(evt) {
+    const sign = evt.target.checked ? 1 : -1;
+    this.updateData({
+      likeCount: this._data.likeCount + sign,
+      isLiked: !this._data.isLiked,
+    });
+
+    this._callback.likeClick(
+      UserAction.UPDATE_COMMENT,
+      UpdateType.NONE,
+      this._data
+      );
+  }
+
+  setLikeClickHandler(callback) {
+    this._callback.likeClick = callback;
+
+    this.getElement().querySelector('.comment-like')
+      .addEventListener('click', this._likeClickHandler);
   }
 }
+
+
+////// ЛАЙК ПО КОММЕНТУ ДОЛЖЕН ДЕЛАТЬ КОММЕНТ ЖИРНЫМ И ДОЛЖЕН ДОБАВЛЯТЬ К ДАТЕ ИЗЛАЙКЕД.....
+///// ТАК ЖЕ ГДЕ ТО НУЖНО СОЕДИНЯТЬ ДАННЫЕ - ПЕРЕД РЕНДЕРОМ КО ВСЕМ КОММЕНТАМ ДОБАВИТЬ isLIKED ЕСЛИ ПОЛЬЗОВАТЕЛЬ ИХ ЛАЙКАЛ И ОНИ ЕСТЬ У НЕГО В ПРОФИЛЕ....
+///// ПРИ ЛАЙКЕ ДОБАВЛЯТЬ ПОЛЬЗОВАТЕЛЮ В ПРОФИЛЬ ИХ

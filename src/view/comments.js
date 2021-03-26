@@ -67,6 +67,9 @@ export class CommentsSectionView extends Smart {
 
   _submitHandler(evt) {
     evt.preventDefault();
+    if (!this._data.text) {
+      return;
+    }
 
     this._callback.submit(
       UserAction.ADD_COMMENT,

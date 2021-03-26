@@ -5,3 +5,4 @@ export const userData = {
   favorites: [100],
   liked: [101]
 }
+///Структура данных - pictures: [{liked:[]}, {favorite: []}] или просто favoritePic: [], likedPic: [], likedComments: []

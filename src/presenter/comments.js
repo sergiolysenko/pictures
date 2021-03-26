@@ -115,6 +115,7 @@ export class CommentsSectionPresenter {
 
   _renderComment(comment) {
     const commentComponent = new CommentView(comment);
+    commentComponent.setLikeClickHandler(this._handleCommentsViewAction);
     const commentsList = this._commentsSectionContainer.querySelector('.comments-list');
     render(commentsList, commentComponent, RenderPosition.BEFOREEND);
 
@@ -157,7 +158,23 @@ export class CommentsSectionPresenter {
       this._renderShowMoreCommentsButton();
     }
   }
+  static parseUserPicturesToBoardData(user, comments) {
+    return comments.map((comment) => {
+      return Object.assign({}, comment,
+       {
+        isLiked: user.liked.some((item) => item === comment.id),
+       })
+    })
+  }
 
+  static parseBoardDataToServerPictures(update) {
+    const adaptedPicture = Object.assign({}, update);
+
+    delete adaptedPicture.isLiked;
+    delete adaptedPicture.isFavorite;
+
+    return adaptedPicture;
+  }
   static addUserDataToComment(user, comment) {
     return Object.assign({}, comment, {
       author: user.name,
