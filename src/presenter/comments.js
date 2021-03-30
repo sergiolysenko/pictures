@@ -8,6 +8,7 @@ import {CommentView} from "../view/comment.js";
 import {CommentsModel} from "../model/comments.js";
 import {CommentsButtonView} from "../view/show-comments.js";
 import {CommentsContainerView} from "../view/comments-container.js";
+import firebaseApi from "../api.js";
 
 const COMMENTS_COUNT_PER_STEP = 3;
 
@@ -51,6 +52,7 @@ export class CommentsSectionPresenter {
     if (this._isCommentsOpen) {
       Object.values(this._commentComponent)
         .forEach((component) => remove(component));
+      this._renderedCommentsCount = COMMENTS_COUNT_PER_STEP;
       this._isCommentsOpen = false;
       this._commentsButtonComponent.updateData({isCommentsOpen: false});
       remove(this._commentsContainerComponent)
@@ -61,18 +63,10 @@ export class CommentsSectionPresenter {
   }
 
   _loadPictureComments(currentPicture) {
-    console.log('load');
-    this._setPictureComments();
-  }
-
-  _setPictureComments() {
-    let currentPictureComments = allComments
-      .filter((comments) => comments.pictureId === this._picture.id);
-
-    if (currentPictureComments.length) {
-      currentPictureComments = currentPictureComments[0].comments;
-    }
-    this._commentsModel.setComments(UpdateType.INIT, currentPictureComments);
+    firebaseApi.getComments(currentPicture)
+      .then((comments) => {
+        this._commentsModel.setComments(UpdateType.INIT, comments);
+      })
   }
 
   _handleCommentsClick() {
@@ -80,7 +74,6 @@ export class CommentsSectionPresenter {
       this.clearCommentsSection();
     } else {
       this._changeMode();
-      this._commentsButtonComponent.updateData({isCommentsOpen: true})
       this._loadPictureComments(this._picture);
       this._isCommentsOpen = true;
     }
@@ -93,17 +86,22 @@ export class CommentsSectionPresenter {
         break;
 
       case UserAction.ADD_COMMENT:
-        update = CommentsSectionPresenter.addUserDataToComment(this._userModel.getUser(), update);
-        this._commentsModel.addComment(updateType, update);
+        firebaseApi.addComment(update, this._picture)
+        .then((loadedComment) => {
+          this._commentsModel.addComment(updateType, loadedComment);
+        })
+        break;
+      case UserAction.DELETE_COMMENT:
+        firebaseApi.deleteComment(update, this._picture)
+        .then(() => {
+          this._commentsModel.deleteComment(updateType, update)
+        });
         break;
     }
   }
 
   _handleCommentsModelEvent(updateType, data) {
     switch (updateType) {
-      case UpdateType.PATCH:
-        this._picturePresenter[data.id].init(data);
-        break;
       case UpdateType.MAJOR:
         this.clearCommentsSection();
         this._renderCommentsSection();
@@ -130,6 +128,7 @@ export class CommentsSectionPresenter {
   _renderComment(comment) {
     const commentComponent = new CommentView(comment);
     commentComponent.setLikeClickHandler(this._handleCommentsViewAction);
+    commentComponent.setDeleteHandler(this._handleCommentsViewAction);
     const commentsList = this._commentsWrapper.querySelector('.comments-list');
     render(commentsList, commentComponent, RenderPosition.BEFOREEND);
 
@@ -154,11 +153,14 @@ export class CommentsSectionPresenter {
   }
 
   _renderCommentsSection() {
+    this._isCommentsOpen = true;
+    this._commentsButtonComponent.updateData({isCommentsOpen: true})
     this._noCommentsComponent = new NoCommentsView();
     this._showMoreCommentsComponent = new ShowMoreCommentsView();
     this._commentsContainerComponent = new CommentsContainerView();
     this._commentsSectionComponent = new CommentsSectionView();
     this._comments = this._commentsModel.getComments();
+
     const commentsCount = this._comments.length;
 
     this._commentsSectionComponent.setSubmitHandler(this._handleCommentsViewAction);
@@ -175,31 +177,5 @@ export class CommentsSectionPresenter {
     if (commentsCount > this._renderedCommentsCount) {
       this._renderShowMoreCommentsButton();
     }
-  }
-
-  static parseUserPicturesToBoardData(user, comments) {
-    return comments.map((comment) => {
-      return Object.assign({}, comment,
-       {
-        isLiked: user.liked.some((item) => item === comment.id),
-       })
-    })
-  }
-
-  static parseBoardDataToServerPictures(update) {
-    const adaptedPicture = Object.assign({}, update);
-
-    delete adaptedPicture.isLiked;
-    delete adaptedPicture.isFavorite;
-
-    return adaptedPicture;
-  }
-
-  static addUserDataToComment(user, comment) {
-    return Object.assign({}, comment, {
-      author: user.name,
-      avatar: user.avatar,
-      time: new Date(),
-    })
   }
 }

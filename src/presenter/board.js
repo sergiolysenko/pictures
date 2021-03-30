@@ -64,7 +64,7 @@ export class BoardPresenter {
   _handleViewAction(actionType, updateType, update) {
     switch(actionType) {
       case UserAction.UPDATE_PICTURE:
-        firebaseApi.updatePictureData(update)
+        firebaseApi.updatePicture(update)
         .then(() => {
           this._picturesModel.updatePicture(updateType, update);
         })
@@ -75,14 +75,14 @@ export class BoardPresenter {
         break;
 
       case UserAction.UPDATE_USER_LIKE:
-        firebaseApi.updatePictureData(update)
+        firebaseApi.updatePicture(update)
         .then(() => {
           this._userModel.updateLiked(updateType, update);
         })
         break;
 
       case UserAction.LOAD_PICTURE:
-        firebaseApi.loadPictureData(update)
+        firebaseApi.loadPicture(update)
           .then((loadedData) => {
             this._picturesModel.loadPicture(updateType, loadedData);
           })

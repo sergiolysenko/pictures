@@ -3,7 +3,6 @@ import "./img/logo-pictures.png";
 import "./style.css";
 import {BoardPresenter} from "./presenter/board.js";
 import {render, RenderPosition} from "./utils/render.js";
-import {userData} from "./mock/user.js";
 import {PicturesModel} from "./model/pictures.js";
 import {UpdateType, MenuItem} from "./const.js";
 import {UserModel} from "./model/user.js";
@@ -40,5 +39,3 @@ render(headerContainer, siteHeaderView, RenderPosition.BEFOREEND);
 
 firebaseApi.getPictures()
   .then((pictures) => picturesModel.setPictures(UpdateType.INIT, pictures));
-
-

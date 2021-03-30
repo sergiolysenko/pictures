@@ -5,12 +5,15 @@ import "firebase/storage";
 import {uuidv4} from "./utils/common.js";
 
 const PICTURE_COLLECTION = 'pictures';
+const COMMENTS_COLLECTION = 'comments';
+
 const user = {
   id: 352789,
   avatar: "https://images.unsplash.com/photo-1507965613665-5fbb4cbb8399?ixid=MXwxMjA3fDB8MHx0b3BpYy1mZWVkfDQzfHRvd0paRnNrcEdnfHxlbnwwfHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
   name: "Alex",
-  favorites: [],
-  liked: []
+  picFavorites: [],
+  picLiked: [],
+  commLiked: [],
 }
 
 class Firebase {
@@ -31,9 +34,17 @@ class Firebase {
   getPictures() {
     return this._picturesCollection.get()
       .then((response) => response.docs.map((picture) => {
-          return this.adaptDataToClient(picture, this._user);
+          return this.adaptPictureDataToClient(picture, this._user);
         })
       )
+  }
+
+  getComments(picture) {
+    return this._picturesCollection.doc(picture.id)
+      .collection('comments').get()
+      .then((response) => response.docs.map((comment) => {
+        return this.adaptCommentDataToClient(comment)
+      }));
   }
 
   deletePicture(picture) {
@@ -43,45 +54,65 @@ class Firebase {
     });
   }
 
-  updatePictureData(update) {
+  updatePicture(update) {
     return this._picturesCollection.doc(update.id)
-      .set(this.adaptDataToServer(update));
+      .set(this.adaptPictureDataToServer(update));
   }
 
-  loadPictureData(data) {
-    return this.uploadImgOnStorage(data.src)
+  loadPicture(data) {
+    return this._uploadImgOnStorage(data.src)
       .then((response) => response.ref.getDownloadURL())
       .then((url) => {
         data = Object.assign({}, data, {src: url});
 
       return this._picturesCollection
-        .add(this.adaptDataToServer(data))
+        .add(this.adaptPictureDataToServer(data))
         .then((docRef) => docRef.get())
         .then((loadedData) => {
-          return this.adaptDataToClient(loadedData, this._user);
+          return this.adaptPictureDataToClient(loadedData, this._user);
         })
       });
   }
 
-  uploadImgOnStorage(pictureSrc) {
+  addComment(comment, picture) {
+    return this._picturesCollection.doc(picture.id)
+    .collection('comments').add(this.adaptCommentDataToServer(comment))
+    .then((docRef) => docRef.get())
+    .then((loadedData) => {
+      return this.adaptCommentDataToClient(loadedData);
+    })
+  }
+
+  updateComment(update) {
+    return this._picturesCollection.doc(picture.id)
+      .collection('comments').doc(update.id)
+      .set(update);
+  }
+
+  deleteComment(comment, picture) {
+    return this._picturesCollection.doc(picture.id)
+      .collection('comments').doc(comment.id).delete();
+  }
+
+  _uploadImgOnStorage(pictureSrc) {
     const name = uuidv4();
     const ref = this._imgStorage.child(name);
     return ref.putString(pictureSrc, 'data_url');
   }
 
-  adaptDataToClient(picture, user) {
+  adaptPictureDataToClient(picture) {
       return Object.assign(
         {},
         picture.data(),
         {
           id: picture.id,
-          isLiked: user ? user.liked.some((item) => item === picture.id) : false,
-          isFavorite: user ? user.favorites.some((item) => item === picture.id) : false,
+          isLiked: user ? user.picLiked.some((item) => item === picture.id) : false,
+          isFavorite: user ? user.picFavorites.some((item) => item === picture.id) : false,
         }
       )
   }
 
-  adaptDataToServer(data) {
+  adaptPictureDataToServer(data) {
     const adaptedData = Object.assign({}, data, user ? {
       author: user.name,
     } : {});
@@ -92,10 +123,26 @@ class Firebase {
 
     return adaptedData;
   }
+
+  adaptCommentDataToClient(comment) {
+    return Object.assign({}, comment.data(), {
+      id: comment.id,
+      isLiked: user ? user.commLiked.some((item) => item === comment.id) : false,
+    })
+  }
+
+  adaptCommentDataToServer(comment) {
+    const adaptedData = Object.assign({}, comment, user ? {
+      author: user.name,
+      avatar: user.avatar,
+      time: new Date(),
+    } : {});
+
+    delete adaptedData.isLiked;
+    delete adaptedData.id;
+
+    return adaptedData;
+  }
 }
 
 export default new Firebase();
-
-// Создать социал презентер в котором объеденить блок лайков и комментарии
-// Его можно будет легко удалять и грузить заново...
-// Как минимум перенести всю фигню с кнопкой и рендером в комментс презентер.

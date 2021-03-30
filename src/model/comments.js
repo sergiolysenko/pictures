@@ -40,4 +40,19 @@ export class CommentsModel extends Observer {
 
     this._notify(updateType, update);
   }
+
+  deleteComment(updateType, deletedComment) {
+    const index = this._comments.findIndex((comment) => comment.id === deletedComment.id);
+
+    if (index === -1) {
+      throw new Error("Can't delete unexisting comment")
+    }
+
+    this._comments = [
+      ...this._comments.slice(0, index),
+      ...this._comments.slice(index + 1)
+    ]
+
+    this._notify(updateType);
+  }
 }

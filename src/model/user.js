@@ -36,13 +36,13 @@ export class UserModel extends Observer {
   }
 
   updateFavorites(updateType, update) {
-    this._user.favorites = this._update(this._user.favorites, update.id);
+    this._user.favorites = this._update(this._user.picFavorites, update.id);
 
     this._notify(updateType, update);
   }
 
   updateLiked(updateType, update) {
-    this._user.liked = this._update(this._user.liked, update.id);
+    this._user.liked = this._update(this._user.picLiked, update.id);
 
     this._notify(updateType, update);
   }

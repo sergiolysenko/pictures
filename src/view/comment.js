@@ -39,11 +39,11 @@ const createComment = (comment) => {
               <small>Like</small>
             </label>
             <small class="self-center">.</small>
-            <a href="#" class="hover:underline">
+            <button class="delete-btn hover:underline">
               <small>Delete</small>
-            </a>
+            </button>
             <small class="self-center">.</small>
-            <small>${dayjs(time).format('DD.MM.YYYY')}</small>
+            <small>${dayjs.unix(time.seconds).format('DD.MM.YYYY')}</small>
           </div>
         </div>
       </div>
@@ -57,6 +57,7 @@ export class CommentView extends Smart {
     this._data = comment;
 
     this._likeClickHandler = this._likeClickHandler.bind(this);
+    this._deleteClickHandler = this._deleteClickHandler.bind(this);
   }
 
   getTemplate() {
@@ -81,6 +82,21 @@ export class CommentView extends Smart {
       );
   }
 
+  _deleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.delete(
+      UserAction.DELETE_COMMENT,
+      UpdateType.MAJOR,
+      this._data);
+  }
+
+  setDeleteHandler(callback) {
+    this._callback.delete = callback;
+
+    this.getElement().querySelector('.delete-btn')
+      .addEventListener('click', this._deleteClickHandler);
+  }
+
   setLikeClickHandler(callback) {
     this._callback.likeClick = callback;
 
@@ -88,8 +104,3 @@ export class CommentView extends Smart {
       .addEventListener('click', this._likeClickHandler);
   }
 }
-
-
-////// ЛАЙК ПО КОММЕНТУ ДОЛЖЕН ДЕЛАТЬ КОММЕНТ ЖИРНЫМ И ДОЛЖЕН ДОБАВЛЯТЬ К ДАТЕ ИЗЛАЙКЕД.....
-///// ТАК ЖЕ ГДЕ ТО НУЖНО СОЕДИНЯТЬ ДАННЫЕ - ПЕРЕД РЕНДЕРОМ КО ВСЕМ КОММЕНТАМ ДОБАВИТЬ isLIKED ЕСЛИ ПОЛЬЗОВАТЕЛЬ ИХ ЛАЙКАЛ И ОНИ ЕСТЬ У НЕГО В ПРОФИЛЕ....
-///// ПРИ ЛАЙКЕ ДОБАВЛЯТЬ ПОЛЬЗОВАТЕЛЮ В ПРОФИЛЬ ИХ
