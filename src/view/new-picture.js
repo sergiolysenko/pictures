@@ -1,7 +1,6 @@
 import {Smart} from "./smart.js";
 
 const BLANK_PICTURE = {
-  id: "",
   src: "",
   title: "",
   author: "",
@@ -9,14 +8,13 @@ const BLANK_PICTURE = {
 }
 
 const createNewPictureTemplate = (picture) => {
-  const {src = null} = picture;
+  const {id = "", src = null, title} = picture;
 
   return `<section class="load-new-picture">
   <form class="bg-white h-full p7 rounded-lg mx-auto">
     <div class="h-full relative flex flex-col p-4 pb-3 text-gray-400 border border-gray-200 rounded-lg">
-        <div class="h-full mb-3 relative flex flex-col justify-center text-gray-400 border border-gray-200 border-dashed rounded cursor-pointer">
-            <input accept="*" type="file" multiple class="img-input absolute inset-0 z-10 w-full h-50 p-0 m-0 outline-none opacity-0 cursor-pointer"/>
-            <!-- ПОПРАВИТЬ ПРЕВЬЮ, ЧТОБЫ РОВНО ПО РАЗМЕРУ ВЛАЗИЛО И КРУГЛЫЕ КРАЯ -->
+        <div class="h-full mb-3 relative flex flex-col justify-center text-gray-400 border border-gray-200 border-dashed rounded">
+            <input accept="*" type="file" multiple class="img-input absolute inset-0 z-10 w-full h-50 p-0 m-0 outline-none opacity-0 ${id ? "" : "cursor-pointer"}" ${id ? "disabled" : ""}/>
             ${src ? `
                 <img src=${src} class="object-cover w-full h-full rounded" />
               ` :
@@ -31,18 +29,21 @@ const createNewPictureTemplate = (picture) => {
         <div class="flex flex-col items-center">
           <div class="flex flex-row items-center w-full border rounded-3xl h-10 px-3 pb-1 mb-3">
             <div class="w-full">
-              <input type="text" class="picture-title border border-transparent w-full focus:outline-none text-sm h-7 flex items-center" placeholder="Write your description">
+              <input type="text" class="picture-title border border-transparent w-full focus:outline-none text-sm h-7 flex items-center" placeholder="Write your description" value="${title}">
             </div>
           </div>
           <div class="flex flex-row w-full">
             <button type="submit" class="button-submit flex items-center justify-center mr-1 h-10 w-full rounded-3xl bg-gray-200 hover:bg-gray-300 text-indigo-800 text-white"
             ${src ? `` : `disabled`}
             >
-              Load
+            ${id ? `Save` : `Load`}
             </button>
             <button type="button" class="cancel-button flex items-center justify-center h-10 w-full rounded-3xl bg-red-500 hover:bg-red-600 text-indigo-800 text-white">
               Cancel
             </button>
+            ${id ? `<button type="button" class="delete-button flex items-center justify-center h-10 w-full rounded-3xl bg-red-700 hover:bg-red-800 text-indigo-800 text-white ml-1">
+              DEL
+            </button>` : ""}
           </div>
         </div>
       </div>
@@ -51,12 +52,13 @@ const createNewPictureTemplate = (picture) => {
 }
 
 export class NewPictureView extends Smart {
-  constructor() {
+  constructor(picture = BLANK_PICTURE) {
     super();
-    this._data = BLANK_PICTURE;
+    this._data = picture;
 
     this._submitHandler = this._submitHandler.bind(this);
     this._cancelClickHandler = this._cancelClickHandler.bind(this);
+    this._deleteClickHandler = this._deleteClickHandler.bind(this);
     this._descriptionInputHandler = this._descriptionInputHandler.bind(this);
     this._loadImgHandler = this._loadImgHandler.bind(this);
 
@@ -71,6 +73,10 @@ export class NewPictureView extends Smart {
     this._setInnerHandlers();
     this.setSubmitHandler(this._callback.submit);
     this.setCancelClickHandler(this._callback.cancelClick);
+  }
+
+  reset(picture) {
+    this.updateData(picture);
   }
 
   _setInnerHandlers() {
@@ -99,6 +105,11 @@ export class NewPictureView extends Smart {
     this._callback.submit(this._data);
   }
 
+  _deleteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.deleteClick(this._data);
+  }
+
   _loadImgHandler() {
     const fileChooser = this.getElement().querySelector(`.img-input`);
     const file = fileChooser.files[0];
@@ -113,6 +124,7 @@ export class NewPictureView extends Smart {
 
       reader.readAsDataURL(file);
     }
+    return file;
   }
 
   setSubmitHandler(callback) {
@@ -126,5 +138,10 @@ export class NewPictureView extends Smart {
     this._callback.cancelClick = callback;
     this.getElement().querySelector(`.cancel-button`)
       .addEventListener(`click`, this._cancelClickHandler);
+  }
+
+  setDeleteClickHandler(callback) {
+    this._callback.deleteClick = callback;
+    this.getElement().querySelector(`.delete-button`).addEventListener(`click`, this._deleteClickHandler);
   }
 }

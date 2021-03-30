@@ -1,6 +1,8 @@
 import {Smart} from "./smart.js";
 
-const createCommentsButtonTemplate = (isCommentsOpen) => {
+const createCommentsButtonTemplate = (data) => {
+  const {isCommentsOpen} = data;
+
   return `<div class="flex justify-center">
         <button class="comments-btn font-medium text-sm" type="button">${isCommentsOpen ? `Hide` : `Show`} comments</button>
       </div>`
@@ -15,7 +17,7 @@ export class CommentsButtonView extends Smart {
   }
 
   getTemplate() {
-    return createCommentsButtonTemplate(this._data.isCommentsOpen);
+    return createCommentsButtonTemplate(this._data);
   }
 
   restoreHandlers() {
@@ -25,7 +27,6 @@ export class CommentsButtonView extends Smart {
   _commentsButtonHandler(evt) {
     evt.preventDefault();
     this._callback.commentsClick();
-    this.updateData({isCommentsOpen: !this._data.isCommentsOpen});
   }
 
   setCommentsButtonHandler(callback) {

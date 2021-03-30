@@ -1,11 +1,14 @@
-import {CommentsButtonView} from "../view/show-comments.js";
-import {CommentsContainerView} from "../view/comments-container.js";
 import {PictureView} from "../view/picture.js";
+import {NewPictureView} from "../view/new-picture.js";
 import {SocialBlockView} from "../view/social-block.js";
-import {render, remove, RenderPosition} from "../utils/render.js";
+import {render, remove, RenderPosition, replace} from "../utils/render.js";
 import {UpdateType, UserAction} from "../const.js";
 import {CommentsSectionPresenter} from "./comments.js";
-import {CommentsModel} from "../model/comments.js";
+
+const Mode = {
+  DEFAULT: `DEFAULT`,
+  EDITING: `EDITING`,
+};
 
 export class PicturePresenter {
   constructor(picturesContainer, changeMode, changePicture, userModel) {
@@ -13,16 +16,16 @@ export class PicturePresenter {
     this._changeMode = changeMode;
     this._changePicture = changePicture;
     this._userModel = userModel;
+    this._mode = Mode.DEFAULT;
 
-    this._isCommentsOpen = false;
-
-    this._commentsButtonComponent = null;
     this._pictureComponent = null;
+    this._pictureEditComponent = null;
     this._socialBlockComponent = null;
-    this._socialBlockContainer = null;
-    this._commentsContainer = null;
 
-    this._handleCommentsClick = this._handleCommentsClick.bind(this);
+    this._handleEditClick = this._handleEditClick.bind(this);
+    this._handleCancelClick = this._handleCancelClick.bind(this);
+    this._handleFormSubmit = this._handleFormSubmit.bind(this);
+    this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._handleLikeClick = this._handleLikeClick.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
   }
@@ -30,47 +33,91 @@ export class PicturePresenter {
   init(picture) {
     this._picture = picture;
 
+    const prevPictureComponent = this._pictureComponent;
+    const prevPictureEditComponent = this._pictureEditComponent;
+
     this._pictureComponent = new PictureView(this._picture);
-    this._commentsButtonComponent = new CommentsButtonView();
+    this._pictureEditComponent = new NewPictureView(this._picture);
     this._socialBlockComponent = new SocialBlockView(this._picture);
-    this._commentsContainerComponent = new CommentsContainerView();
-    this._commentsModel = new CommentsModel();
 
     this._socialBlockContainer = this._pictureComponent.getElement().querySelector('.social-block-wrapper');
 
-    render(this._picturesContainer, this._pictureComponent, RenderPosition.BEFOREEND);
-    render(this._socialBlockContainer, this._socialBlockComponent, RenderPosition.BEFOREEND);
-    render(this._socialBlockContainer, this._commentsButtonComponent, RenderPosition.BEFOREEND);
-    render(this._socialBlockContainer, this._commentsContainerComponent, RenderPosition.BEFOREEND)
-
-    this._commentsButtonComponent.setCommentsButtonHandler(this._handleCommentsClick);
+    this._pictureComponent.setEditClickHandler(this._handleEditClick);
     this._socialBlockComponent.setLikeClickHandler(this._handleLikeClick);
     this._socialBlockComponent.setFavoriteClickHandler(this._handleFavoriteClick);
+    this._pictureEditComponent.setSubmitHandler(this._handleFormSubmit);
+    this._pictureEditComponent.setCancelClickHandler(this._handleCancelClick);
+    this._pictureEditComponent.setDeleteClickHandler(this._handleDeleteClick);
+
+    this._renderSocialSection();
+    this._renderCommentsSection();
+
+    if (prevPictureComponent === null || prevPictureEditComponent === null) {
+      render(this._picturesContainer, this._pictureComponent, RenderPosition.BEFOREEND);
+      return;
+    }
+
+    if (this._mode === Mode.DEFAULT) {
+      replace(prevPictureComponent, this._pictureComponent);
+    }
+
+    if (this._mode === Mode.EDITING) {
+      replace(prevPictureEditComponent, this._pictureComponent);
+      this._mode = Mode.DEFAULT;
+    }
+
+    remove(prevPictureComponent);
+    remove(prevPictureEditComponent);
   }
 
   destroy() {
-    this._clearCommentsSection();
+    this._commentsSectionPresenter.destroy();
     remove(this._pictureComponent);
-    remove(this._commentsButtonComponent);
+    remove(this._pictureEditComponent);
     remove(this._socialBlockComponent);
-    remove(this._commentsContainerComponent);
   }
 
   resetView() {
-    this._commentsButtonComponent.updateData({isCommentsOpen: false});
-    this._isCommentsOpen = false;
-    this._clearCommentsSection();
+    this._commentsSectionPresenter.clearCommentsSection();
+    if (this._mode === Mode.EDITING) {
+      this._replaceEditToPicture();
+    }
   }
 
-  _handleCommentsClick() {
-    if (this._isCommentsOpen) {
-      this._clearCommentsSection();
-    } else {
-      this._changeMode();
-      this._renderCommentsSection();
-    }
+  _replacePictureToEdit() {
+    replace(this._pictureComponent, this._pictureEditComponent);
+    this._changeMode();
+    this._mode = Mode.EDITING;
+  }
 
-    this._isCommentsOpen = !this._isCommentsOpen;
+  _replaceEditToPicture() {
+    replace(this._pictureEditComponent, this._pictureComponent);
+    this._mode = Mode.DEFAULT;
+  }
+
+  _handleEditClick() {
+    this._replacePictureToEdit();
+  }
+
+  _handleFormSubmit(update) {
+    this._changePicture(
+        UserAction.UPDATE_PICTURE,
+        UpdateType.PATCH,
+        update
+    );
+  }
+
+  _handleCancelClick() {
+    this._pictureEditComponent.reset(this._picture);
+    this._replaceEditToPicture();
+  }
+
+  _handleDeleteClick(picture) {
+    this._changePicture(
+        UserAction.DELETE_PICTURE,
+        UpdateType.MAJOR,
+        picture
+    );
   }
 
   _handleLikeClick(update) {
@@ -94,16 +141,12 @@ export class PicturePresenter {
     );
   }
 
-  _clearCommentsSection() {
-    if(!this._commentsSectionPresenter) {
-      return;
-    }
-    this._commentsSectionPresenter.destroy();
+  _renderSocialSection() {
+    render(this._socialBlockContainer, this._socialBlockComponent, RenderPosition.BEFOREEND);
   }
 
   _renderCommentsSection() {
-    const commentsContainer = this._commentsContainerComponent.getElement();
-    this._commentsSectionPresenter = new CommentsSectionPresenter(commentsContainer, this._commentsModel, this._userModel);
+    this._commentsSectionPresenter = new CommentsSectionPresenter(this._socialBlockContainer, this._userModel, this._changeMode);
     this._commentsSectionPresenter.init(this._picture);
   }
 }

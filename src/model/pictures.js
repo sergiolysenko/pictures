@@ -40,4 +40,19 @@ export class PicturesModel extends Observer {
 
     this._notify(updateType, update);
   }
+
+  deletePicture(updateType, update) {
+    const index = this._pictures.findIndex((picture) => picture.id === update.id);
+
+    if (index === -1) {
+      throw new Error(`Can't delete unexisting task`);
+    }
+
+    this._pictures = [
+      ...this._pictures.slice(0, index),
+      ...this._pictures.slice(index + 1)
+    ];
+
+    this._notify(updateType);
+  }
 }

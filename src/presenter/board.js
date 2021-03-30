@@ -1,20 +1,23 @@
 import {NewPicturePresenter} from "./new-picture.js";
 import {PicturePresenter} from "./picture.js";
 import {UserAction, UpdateType} from "../const.js";
+import firebaseApi from "../api.js";
+
 
 export class BoardPresenter {
-  constructor(boardContainer, pictureModel, userModel) {
+  constructor(boardContainer, picturesModel, userModel) {
     this._boardContainer = boardContainer;
     this._picturePresenter = {};
-    this._pictureModel = pictureModel;
+    this._picturesModel = picturesModel;
     this._userModel = userModel;
 
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
 
-    this._pictureModel.addObserver(this._handleModelEvent);
     this._newPicturePresenter = new NewPicturePresenter(this._boardContainer, this._handleViewAction);
+
+    this._picturesModel.addObserver(this._handleModelEvent);
   }
 
   init() {
@@ -22,11 +25,12 @@ export class BoardPresenter {
   }
 
   createPicture(callback) {
-    this._newPicturePresenter.init(callback);
     this._handleModeChange();
+    this._newPicturePresenter.init(callback);
   }
 
   _handleModeChange() {
+    this._newPicturePresenter.destroy();
     Object
       .values(this._picturePresenter)
       .forEach((presenter) => presenter.resetView());
@@ -44,13 +48,8 @@ export class BoardPresenter {
   }
 
   _renderBoard() {
-    const pictures = this._pictureModel.getPictures();
-    const user = this._userModel.getUser();
-
-    const boardPictures = BoardPresenter
-      .parseUserPicturesToBoardData(user, pictures);
-
-    this._renderPictures(boardPictures);
+    const pictures = this._picturesModel.getPictures();
+    this._renderPictures(pictures);
   }
 
   _clearBoard() {
@@ -65,8 +64,10 @@ export class BoardPresenter {
   _handleViewAction(actionType, updateType, update) {
     switch(actionType) {
       case UserAction.UPDATE_PICTURE:
-        this._pictureModel.updatePicture(updateType,
-          BoardPresenter.parseBoardDataToServerPictures(update));
+        firebaseApi.updatePictureData(update)
+        .then(() => {
+          this._picturesModel.updatePicture(updateType, update);
+        })
         break;
 
       case UserAction.UPDATE_USER_FAVORITE:
@@ -74,13 +75,24 @@ export class BoardPresenter {
         break;
 
       case UserAction.UPDATE_USER_LIKE:
-        this._userModel.updateLiked(updateType, update);
+        firebaseApi.updatePictureData(update)
+        .then(() => {
+          this._userModel.updateLiked(updateType, update);
+        })
         break;
 
       case UserAction.LOAD_PICTURE:
-        const currentUser = this._userModel.getUser();
-        update = BoardPresenter.adaptNewPictureToBoard(currentUser, update);
-        this._pictureModel.loadPicture(updateType, update);
+        firebaseApi.loadPictureData(update)
+          .then((loadedData) => {
+            this._picturesModel.loadPicture(updateType, loadedData);
+          })
+        break;
+
+      case UserAction.DELETE_PICTURE:
+        firebaseApi.deletePicture(update)
+          .then(() => {
+            this._picturesModel.deletePicture(updateType, update)
+          })
         break;
     }
   }
@@ -94,32 +106,9 @@ export class BoardPresenter {
         this._clearBoard();
         this._renderBoard();
         break;
+      case UpdateType.INIT:
+        this._renderBoard();
+        break;
     }
-  }
-
-  static parseUserPicturesToBoardData(user, pictures) {
-    return pictures.map((picture) => {
-      return Object.assign({}, picture,
-       {
-        isLiked: user.liked.some((item) => item === picture.id),
-        isFavorite: user.favorites.some((item) => item === picture.id),
-       })
-    })
-  }
-
-  static parseBoardDataToServerPictures(update) {
-    const adaptedPicture = Object.assign({}, update);
-
-    delete adaptedPicture.isLiked;
-    delete adaptedPicture.isFavorite;
-
-    return adaptedPicture;
-  }
-
-  static adaptNewPictureToBoard(user, newPicture) {
-    return Object.assign({}, newPicture, {
-      id: Math.floor(Math.random() * 100000),
-      author: user.name,
-    })
   }
 }

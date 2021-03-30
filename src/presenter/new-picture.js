@@ -27,7 +27,7 @@ export class NewPicturePresenter {
   }
 
   destroy() {
-    if (this._cancelCallback !== null) {
+    if (this._cancelCallback) {
       this._cancelCallback();
     }
 
