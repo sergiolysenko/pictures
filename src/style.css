@@ -18,10 +18,7 @@
 .like:checked + svg {
   transform: scale(1.2);
   fill: rgba(220, 38, 38, 1);
-}
-
-.load-picture:hover svg {
-  transform: rotate(180deg);
+  transition: .3s transform ease-in-out;
 }
 
 .comment-like:checked + small {

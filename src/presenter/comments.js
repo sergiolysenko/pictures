@@ -3,7 +3,6 @@ import {NoCommentsView} from "../view/no-comments.js";
 import {ShowMoreCommentsView} from "../view/show-more-comments.js";
 import {render, remove, RenderPosition} from "../utils/render.js";
 import {UpdateType, UserAction} from "../const.js";
-import {allComments} from "../mock/comment.js";
 import {CommentView} from "../view/comment.js";
 import {CommentsModel} from "../model/comments.js";
 import {CommentsButtonView} from "../view/show-comments.js";
