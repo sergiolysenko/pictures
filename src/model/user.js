@@ -10,16 +10,13 @@ export class UserModel extends Observer {
     this._user = user;
   }
 
+  updateUser(updateType, update) {
+    this._user = update;
+    this._notify(updateType, update);
+  }
+
   getUser() {
     return this._user;
-  }
-
-  getFavorites() {
-    return this._user.favorites;
-  }
-
-  getLiked() {
-    return this._user.liked;
   }
 
   _update(userItemsID, newItemID) {
@@ -35,15 +32,15 @@ export class UserModel extends Observer {
     ]
   }
 
-  updateFavorites(updateType, update) {
-    this._user.favorites = this._update(this._user.picFavorites, update.id);
-
-    this._notify(updateType, update);
+  getUpdatedFavorites(update) {
+    return Object.assign({}, this._user, {
+      favoritePic: this._update(this._user.favoritePic, update.id)
+    })
   }
 
-  updateLiked(updateType, update) {
-    this._user.liked = this._update(this._user.picLiked, update.id);
-
-    this._notify(updateType, update);
+  getUpdatedLiked(update) {
+    return Object.assign({}, this._user, {
+      likedPic: this._update(this._user.likedPic, update.id)
+    })
   }
 }

@@ -3,7 +3,6 @@ import "./img/logo-pictures.png";
 import "./style.css";
 import firebase from "firebase/app";
 import {BoardPresenter} from "./presenter/board.js";
-import {render, RenderPosition} from "./utils/render.js";
 import {PicturesModel} from "./model/pictures.js";
 import {UpdateType, MenuItem} from "./const.js";
 import {UserModel} from "./model/user.js";
@@ -41,7 +40,7 @@ const boardPresenter = new BoardPresenter(picturesListContainer, picturesModel, 
 const initApp = () => {
   siteHeaderPresenter.init(userModel);
 
-  firebaseApi.getPictures()
+  firebaseApi.getPictures(userModel.getUser())
   .then((pictures) => picturesModel.setPictures(UpdateType.MAJOR, pictures));
 }
 

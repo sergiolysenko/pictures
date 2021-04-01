@@ -2,8 +2,16 @@ import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/storage";
 import 'firebaseui/dist/firebaseui.css'
+import firebaseApi from "./api.js";
 
 const USERS_COLLECTION = 'users';
+const DEFAULT_USER_DATA = {
+  avatar: "./img/default-user-avatar.png",
+  favoritePic: [],
+  likedComm: [],
+  likedPic: [],
+  loadedPic: [],
+}
 
 class UserAuthApi {
   constructor() {
@@ -18,28 +26,35 @@ class UserAuthApi {
     this.createUserData = this.createUserData.bind(this);
   }
 
-  getUser() {
-    return firebase.auth().currentUser;
+  getCurrentUser() {
+    return this.getUserData(firebase.auth().currentUser);
   }
 
-  getUserData(user) {
-    return this._usersCollection.doc(user.uid).get()
+  getUserData(firebaseUser) {
+    return this._usersCollection.doc(firebaseUser.uid).get()
     .then((userDoc) => {
       const userData = userDoc.data();
 
       return {
-         id: user.uid,
-         name: user.displayName,
-         avatar: userData ? userData.avatar : [],
-         favoritePic: userData ? userData.favoritePic : [],
-         likedComm: userData ? userData.likedComm : [],
-         likedPic: userData ? userData.likedPic : [],
-         loadedPic: userData ? userData.loadedPic : [],
+         id: firebaseUser.uid,
+         name: firebaseUser.displayName,
+         avatar: userData.avatar,
+         favoritePic: userData.favoritePic,
+         likedComm: userData.likedComm,
+         likedPic: userData.likedPic,
+         loadedPic: userData.loadedPic,
        }
      })
      .catch((error) => {
-       throw new Error(`Can't find user with ${user.uid}, or it's ${error}`)
+       throw new Error(`Can't find user with ${firebaseUser.uid}, or it's ${error}`)
      });
+  }
+
+  updateUserData(data) {
+    return this._usersCollection.doc(data.id)
+      .set(this.adaptUserDataToServer(data))
+      .then(() => console.log(`User ${data.name} data has been successfully updated`))
+      .catch((error) => console.log(`Something goes wrong! ${error}`));
   }
 
   showSignIn() {
@@ -48,6 +63,8 @@ class UserAuthApi {
         signInSuccessWithAuthResult: (authResult) => {
           globalThis.authResult = authResult;
           globalThis.isNewUser = authResult.additionalUserInfo.isNewUser;
+          console.log('User has been logged');
+
           return false;
         },
       },
@@ -63,17 +80,21 @@ class UserAuthApi {
   }
 
   createUserData(authResult) {
-    this._usersCollection.doc(authResult.user.uid).set({
-      avatar: "./img/default-user-avatar.png",
-      favoritePic: [],
-      likedComm: [],
-      likedPic: [],
-      loadedPic: [],
-    }).then(() => {
-      console.log("New user data created successfully");
+    this._usersCollection.doc(authResult.user.uid).set(DEFAULT_USER_DATA)
+    .then(() => {
+      console.log("New user data has been created successfully");
     }).catch((error) => {
-      throw new Error(`Error with creating user data - ${error}`)
+      throw new Error(`Error while creating user data - ${error}`)
     })
+  }
+
+  adaptUserDataToServer(data) {
+    const adaptedData = Object.assign({}, data);
+
+    delete adaptedData.id;
+    delete adaptedData.name;
+
+    return adaptedData;
   }
 }
 

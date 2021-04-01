@@ -3,21 +3,12 @@ import {firebaseConfig} from "./firebase-config.js";
 import {uuidv4} from "./utils/common.js";
 import "firebase/firestore";
 import "firebase/storage";
-import 'firebaseui/dist/firebaseui.css'
+import "firebaseui/dist/firebaseui.css";
 
 const PICTURE_COLLECTION = 'pictures';
 const COMMENTS_COLLECTION = 'comments';
 
-const user = {
-  id: 352789,
-  avatar: "https://images.unsplash.com/photo-1507965613665-5fbb4cbb8399?ixid=MXwxMjA3fDB8MHx0b3BpYy1mZWVkfDQzfHRvd0paRnNrcEdnfHxlbnwwfHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
-  name: "Alex",
-  picFavorites: [],
-  picLiked: [],
-  commLiked: [],
-}
-
-class Firebase {
+class ContentDataApi {
   constructor() {
     firebase.initializeApp(firebaseConfig);
 
@@ -25,50 +16,14 @@ class Firebase {
     this._firestore = firebase.firestore();
     this._picturesCollection = this._firestore.collection(PICTURE_COLLECTION);
     this._imgStorage = this._storage.ref('img');
-
-    // this._firebaseui = require("firebaseui");
-    // this._authUi = new this._firebaseui.auth.AuthUI(firebase.auth());
   }
 
-  /* showSignIn() {
-    const authUi = firebaseApi.getUi();
-
-    authUi.start('#firebaseui-auth-container', {
-      callbacks: {
-        signInSuccessWithAuthResult: function(authResult, redirectUrl) {
-          return false;
-        },
-      },
-      signInFlow: 'popup',
-      signInOptions: [
-        firebase.auth.EmailAuthProvider.PROVIDER_ID
-      ],
-    });
-  }
-
-  signOut() {
-    firebase.auth().signOut()
-    .then(() => console.log('The user signed out'));
-  }
-
-  getUi() {
-    return this._authUi;
-  } */
-
-  getPictures() {
+  getPictures(user) {
     return this._picturesCollection.get()
       .then((response) => response.docs.map((picture) => {
-          return this.adaptPictureDataToClient(picture, this._user);
+          return this.adaptPictureDataToClient(picture, user);
         })
       )
-  }
-
-  getComments(picture) {
-    return this._picturesCollection.doc(picture.id)
-      .collection(COMMENTS_COLLECTION).get()
-      .then((response) => response.docs.map((comment) => {
-        return this.adaptCommentDataToClient(comment)
-      }));
   }
 
   deletePicture(picture) {
@@ -83,19 +38,27 @@ class Firebase {
       .set(this.adaptPictureDataToServer(update));
   }
 
-  loadPicture(data) {
+  loadPicture(data, user) {
     return this._uploadImgOnStorage(data.src)
       .then((response) => response.ref.getDownloadURL())
       .then((url) => {
         data = Object.assign({}, data, {src: url});
 
       return this._picturesCollection
-        .add(this.adaptPictureDataToServer(data))
+        .add(this.adaptPictureDataToServer(data, user))
         .then((docRef) => docRef.get())
         .then((loadedData) => {
-          return this.adaptPictureDataToClient(loadedData, this._user);
+          return this.adaptPictureDataToClient(loadedData, user);
         })
       });
+  }
+
+  getComments(picture) {
+    return this._picturesCollection.doc(picture.id)
+      .collection(COMMENTS_COLLECTION).get()
+      .then((response) => response.docs.map((comment) => {
+        return this.adaptCommentDataToClient(comment)
+      }));
   }
 
   addComment(comment, picture) {
@@ -124,19 +87,20 @@ class Firebase {
     return ref.putString(pictureSrc, 'data_url');
   }
 
-  adaptPictureDataToClient(picture) {
+  adaptPictureDataToClient(picture, user) {
       return Object.assign(
         {},
         picture.data(),
         {
           id: picture.id,
-          isLiked: user ? user.picLiked.some((item) => item === picture.id) : false,
-          isFavorite: user ? user.picFavorites.some((item) => item === picture.id) : false,
+          isLiked: user ? user.likedPic.some((item) => item === picture.id) : false,
+          isFavorite: user ? user.favoritePic.some((item) => item === picture.id) : false,
+          isUserCanModify: user ? user.loadedPic.some((item) => item === picture.id) : false,
         }
       )
   }
 
-  adaptPictureDataToServer(data) {
+  adaptPictureDataToServer(data, user) {
     const adaptedData = Object.assign({}, data, user ? {
       author: user.name,
     } : {});
@@ -144,6 +108,7 @@ class Firebase {
     delete adaptedData.isLiked;
     delete adaptedData.isFavorite;
     delete adaptedData.id;
+    delete adaptedData.isUserCanModify;
 
     return adaptedData;
   }
@@ -151,7 +116,7 @@ class Firebase {
   adaptCommentDataToClient(comment) {
     return Object.assign({}, comment.data(), {
       id: comment.id,
-      isLiked: user ? user.commLiked.some((item) => item === comment.id) : false,
+      /* isLiked: user ? user.likedComm.some((item) => item === comment.id) : false, */
     })
   }
 
@@ -169,4 +134,4 @@ class Firebase {
   }
 }
 
-export default new Firebase();
+export default new ContentDataApi();

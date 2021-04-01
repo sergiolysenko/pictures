@@ -127,17 +127,17 @@ export class PicturePresenter {
         update
     );
     this._changePicture(
-      UserAction.UPDATE_USER_LIKE,
+      UserAction.UPDATE_USER,
       UpdateType.NONE,
-      update
+      this._userModel.getUpdatedLiked(update)
     );
   }
 
   _handleFavoriteClick(update) {
     this._changePicture(
-      UserAction.UPDATE_USER_FAVORITE,
+      UserAction.UPDATE_USER,
       UpdateType.NONE,
-      update
+      this._userModel.getUpdatedFavorites(update)
     );
   }
 

@@ -2,6 +2,7 @@ import {NewPicturePresenter} from "./new-picture.js";
 import {PicturePresenter} from "./picture.js";
 import {UserAction, UpdateType} from "../const.js";
 import firebaseApi from "../api.js";
+import userAuthApi from "../userAuthApi.js";
 
 
 export class BoardPresenter {
@@ -70,19 +71,14 @@ export class BoardPresenter {
         })
         break;
 
-      case UserAction.UPDATE_USER_FAVORITE:
-        this._userModel.updateFavorites(updateType, update);
-        break;
-
-      case UserAction.UPDATE_USER_LIKE:
-        firebaseApi.updatePicture(update)
-        .then(() => {
-          this._userModel.updateLiked(updateType, update);
-        })
+      case UserAction.UPDATE_USER:
+        userAuthApi.updateUserData(update).then(() => {
+          this._userModel.updateUser(UpdateType, update);
+        });
         break;
 
       case UserAction.LOAD_PICTURE:
-        firebaseApi.loadPicture(update)
+        firebaseApi.loadPicture(update, this._userModel.getUser())
           .then((loadedData) => {
             this._picturesModel.loadPicture(updateType, loadedData);
           })
@@ -99,6 +95,8 @@ export class BoardPresenter {
 
   _handleModelEvent(updateType, data) {
     switch (updateType) {
+      case UpdateType.NONE:
+        break;
       case UpdateType.PATCH:
         this._picturePresenter[data.id].init(data);
         break;
