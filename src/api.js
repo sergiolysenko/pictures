@@ -1,8 +1,9 @@
 import firebase from "firebase/app";
 import {firebaseConfig} from "./firebase-config.js";
+import {uuidv4} from "./utils/common.js";
 import "firebase/firestore";
 import "firebase/storage";
-import {uuidv4} from "./utils/common.js";
+import 'firebaseui/dist/firebaseui.css'
 
 const PICTURE_COLLECTION = 'pictures';
 const COMMENTS_COLLECTION = 'comments';
@@ -20,16 +21,39 @@ class Firebase {
   constructor() {
     firebase.initializeApp(firebaseConfig);
 
-    this._user = user;
     this._storage = firebase.storage();
     this._firestore = firebase.firestore();
     this._picturesCollection = this._firestore.collection(PICTURE_COLLECTION);
     this._imgStorage = this._storage.ref('img');
+
+    // this._firebaseui = require("firebaseui");
+    // this._authUi = new this._firebaseui.auth.AuthUI(firebase.auth());
   }
 
-  getUser() {
-    return this._user;
+  /* showSignIn() {
+    const authUi = firebaseApi.getUi();
+
+    authUi.start('#firebaseui-auth-container', {
+      callbacks: {
+        signInSuccessWithAuthResult: function(authResult, redirectUrl) {
+          return false;
+        },
+      },
+      signInFlow: 'popup',
+      signInOptions: [
+        firebase.auth.EmailAuthProvider.PROVIDER_ID
+      ],
+    });
   }
+
+  signOut() {
+    firebase.auth().signOut()
+    .then(() => console.log('The user signed out'));
+  }
+
+  getUi() {
+    return this._authUi;
+  } */
 
   getPictures() {
     return this._picturesCollection.get()
@@ -41,7 +65,7 @@ class Firebase {
 
   getComments(picture) {
     return this._picturesCollection.doc(picture.id)
-      .collection('comments').get()
+      .collection(COMMENTS_COLLECTION).get()
       .then((response) => response.docs.map((comment) => {
         return this.adaptCommentDataToClient(comment)
       }));
@@ -76,7 +100,7 @@ class Firebase {
 
   addComment(comment, picture) {
     return this._picturesCollection.doc(picture.id)
-    .collection('comments').add(this.adaptCommentDataToServer(comment))
+    .collection(COMMENTS_COLLECTION).add(this.adaptCommentDataToServer(comment))
     .then((docRef) => docRef.get())
     .then((loadedData) => {
       return this.adaptCommentDataToClient(loadedData);
@@ -85,13 +109,13 @@ class Firebase {
 
   updateComment(update) {
     return this._picturesCollection.doc(picture.id)
-      .collection('comments').doc(update.id)
+      .collection(COMMENTS_COLLECTION).doc(update.id)
       .set(update);
   }
 
   deleteComment(comment, picture) {
     return this._picturesCollection.doc(picture.id)
-      .collection('comments').doc(comment.id).delete();
+      .collection(COMMENTS_COLLECTION).doc(comment.id).delete();
   }
 
   _uploadImgOnStorage(pictureSrc) {

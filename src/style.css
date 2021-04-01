@@ -7,7 +7,7 @@
 }
 
 .favorite + svg {
-  transition: .3s transform ease-in-out;
+  transition: .3s all ease-in-out;
 }
 
 .favorite + svg path,
@@ -18,7 +18,6 @@
 .like:checked + svg {
   transform: scale(1.2);
   fill: rgba(220, 38, 38, 1);
-  transition: .3s transform ease-in-out;
 }
 
 .comment-like:checked + small {

@@ -6,7 +6,7 @@ export class UserModel extends Observer {
     this._user = null;
   }
 
-  init(user) {
+  setUser(user) {
     this._user = user;
   }
 
