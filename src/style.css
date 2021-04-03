@@ -10,7 +10,6 @@
   transition: .3s all ease-in-out;
 }
 
-.favorite + svg path,
 .like + svg {
   transition: .3s all ease-in-out;
 }

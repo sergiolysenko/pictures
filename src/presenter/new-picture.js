@@ -1,11 +1,12 @@
 import {render, remove, RenderPosition} from "../utils/render.js";
 import {NewPictureView} from "../view/new-picture.js";
-import {UserAction, UpdateType} from "../const.js";
+import {UserAction, UpdateType, UserDataKey} from "../const.js";
 
 export class NewPicturePresenter {
-  constructor(picturesContainer, changeData) {
+  constructor(picturesContainer, changeData, userModel) {
     this._picturesContainer = picturesContainer;
     this._changeData = changeData;
+    this._userModel = userModel;
     this._newPictureComponent = null;
 
     this._handleFormSubmit = this._handleFormSubmit.bind(this);
@@ -47,7 +48,8 @@ export class NewPicturePresenter {
     this._changeData(
         UserAction.LOAD_PICTURE,
         UpdateType.MAJOR,
-        picture
+        picture,
+        UserDataKey.LOADED_PIC
     );
   }
 }

@@ -1,8 +1,10 @@
 import {NewPicturePresenter} from "./new-picture.js";
 import {PicturePresenter} from "./picture.js";
-import {UserAction, UpdateType} from "../const.js";
+import {NoAccessAlertView} from "../view/no-access-alert.js";
+import {UserAction, UpdateType, UserDataKey} from "../const.js";
 import firebaseApi from "../api.js";
 import userAuthApi from "../userAuthApi.js";
+import {render, RenderPosition} from "../utils/render.js";
 
 
 export class BoardPresenter {
@@ -16,9 +18,11 @@ export class BoardPresenter {
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
 
-    this._newPicturePresenter = new NewPicturePresenter(this._boardContainer, this._handleViewAction);
+    this._noAccessAlertComponent = new NoAccessAlertView();
+    this._newPicturePresenter = new NewPicturePresenter(this._boardContainer, this._handleViewAction, this._userModel);
 
     this._picturesModel.addObserver(this._handleModelEvent);
+    this._userModel.addObserver(this._handleModelEvent);
   }
 
   init() {
@@ -62,32 +66,49 @@ export class BoardPresenter {
     this._picturePresenter = {};
   }
 
-  _handleViewAction(actionType, updateType, update) {
+  updateUserData(updateType, update, userDataKeyUpdate) {
+    if(!userDataKeyUpdate) {
+      return;
+    }
+    const newUserData = this._userModel.updateUserDataByKey(update, userDataKeyUpdate);
+
+    userAuthApi.updateUserData(newUserData).then(() => {
+      this._userModel.updateUser(updateType, newUserData);
+    });
+  }
+
+  _handleViewAction(actionType, updateType, update, userDataKeyUpdate) {
     switch(actionType) {
+      case UserAction.IF_NOT_LOGGED:
+        const body = document.querySelector('body');
+        render(body, this._noAccessAlertComponent, RenderPosition.AFTERBEGIN);
+      break;
+
       case UserAction.UPDATE_PICTURE:
         firebaseApi.updatePicture(update)
         .then(() => {
           this._picturesModel.updatePicture(updateType, update);
+          this.updateUserData(updateType, update, userDataKeyUpdate);
         })
         break;
 
       case UserAction.UPDATE_USER:
-        userAuthApi.updateUserData(update).then(() => {
-          this._userModel.updateUser(UpdateType, update);
-        });
+        this.updateUserData(updateType, update, userDataKeyUpdate);
         break;
 
       case UserAction.LOAD_PICTURE:
         firebaseApi.loadPicture(update, this._userModel.getUser())
           .then((loadedData) => {
-            this._picturesModel.loadPicture(updateType, loadedData);
+            this._picturesModel.loadPicture(UpdateType.NONE, loadedData);
+            this.updateUserData(updateType, loadedData, userDataKeyUpdate);
           })
         break;
 
       case UserAction.DELETE_PICTURE:
         firebaseApi.deletePicture(update)
           .then(() => {
-            this._picturesModel.deletePicture(updateType, update)
+            this._picturesModel.deletePicture(updateType, update);
+            this.updateUserData(updateType, update, userDataKeyUpdate);
           })
         break;
     }

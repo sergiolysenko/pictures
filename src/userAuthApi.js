@@ -2,7 +2,6 @@ import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/storage";
 import 'firebaseui/dist/firebaseui.css'
-import firebaseApi from "./api.js";
 
 const USERS_COLLECTION = 'users';
 const DEFAULT_USER_DATA = {
@@ -11,6 +10,7 @@ const DEFAULT_USER_DATA = {
   likedComm: [],
   likedPic: [],
   loadedPic: [],
+  createdComm: [],
 }
 
 class UserAuthApi {
@@ -43,6 +43,7 @@ class UserAuthApi {
          likedComm: userData.likedComm,
          likedPic: userData.likedPic,
          loadedPic: userData.loadedPic,
+         createdComm: userData.createdComm,
        }
      })
      .catch((error) => {

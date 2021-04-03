@@ -12,6 +12,7 @@ export class UserModel extends Observer {
 
   updateUser(updateType, update) {
     this._user = update;
+
     this._notify(updateType, update);
   }
 
@@ -32,15 +33,17 @@ export class UserModel extends Observer {
     ]
   }
 
-  getUpdatedFavorites(update) {
+  updateUserDataByKey(update, key) {
     return Object.assign({}, this._user, {
-      favoritePic: this._update(this._user.favoritePic, update.id)
+      [key]: this._update(this._user[key], update.id)
     })
   }
 
-  getUpdatedLiked(update) {
-    return Object.assign({}, this._user, {
-      likedPic: this._update(this._user.likedPic, update.id)
-    })
+  checkIfPictureIsChangeable(picture) {
+    if (this._user === null) {
+      return false;
+    }
+
+    return this._user.loadedPic.some((picId) => picId === picture.id)
   }
 }

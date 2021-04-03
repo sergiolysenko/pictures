@@ -32,9 +32,10 @@ const createSocialBlockTemplate = (picture) => {
 }
 
 export class SocialBlockView extends Smart {
-  constructor(picture) {
+  constructor(picture, isUserLoggedIn) {
     super();
     this._data = picture;
+    this._isUserLoggedIn = isUserLoggedIn;
 
     this._likeClickHandler = this._likeClickHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
@@ -50,20 +51,24 @@ export class SocialBlockView extends Smart {
   }
 
   _likeClickHandler(evt) {
-    const sign = evt.target.checked ? 1 : -1;
-    this.updateData({
-      likes: this._data.likes + sign,
-      isLiked: !this._data.isLiked,
-    });
-
+    if (this._isUserLoggedIn) {
+      const sign = evt.target.checked ? 1 : -1;
+      this.updateData({
+        likes: this._data.likes + sign,
+        isLiked: !this._data.isLiked,
+      });
+    }
+    evt.preventDefault();
     this._callback.likeClick(this._data);
   }
 
-  _favoriteClickHandler() {
-    this.updateData({
-      isFavorite: !this._data.isFavorite,
-    });
-
+  _favoriteClickHandler(evt) {
+    if (this._isUserLoggedIn) {
+      this.updateData({
+        isFavorite: !this._data.isFavorite,
+      });
+    }
+    evt.preventDefault();
     this._callback.favoriteClick(this._data);
   }
 

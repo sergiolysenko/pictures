@@ -2,7 +2,7 @@ import {PictureView} from "../view/picture.js";
 import {NewPictureView} from "../view/new-picture.js";
 import {SocialBlockView} from "../view/social-block.js";
 import {render, remove, RenderPosition, replace} from "../utils/render.js";
-import {UpdateType, UserAction} from "../const.js";
+import {UpdateType, UserAction, UserDataKey} from "../const.js";
 import {CommentsSectionPresenter} from "./comments.js";
 
 const Mode = {
@@ -16,6 +16,7 @@ export class PicturePresenter {
     this._changeMode = changeMode;
     this._changePicture = changePicture;
     this._userModel = userModel;
+
     this._mode = Mode.DEFAULT;
 
     this._pictureComponent = null;
@@ -32,13 +33,15 @@ export class PicturePresenter {
 
   init(picture) {
     this._picture = picture;
+    this._isUserLoggedIn = this._userModel.getUser() !== null;
+    this._isChangeable = this._userModel.checkIfPictureIsChangeable(this._picture);
 
     const prevPictureComponent = this._pictureComponent;
     const prevPictureEditComponent = this._pictureEditComponent;
 
-    this._pictureComponent = new PictureView(this._picture);
+    this._pictureComponent = new PictureView(this._picture, this._isChangeable);
     this._pictureEditComponent = new NewPictureView(this._picture);
-    this._socialBlockComponent = new SocialBlockView(this._picture);
+    this._socialBlockComponent = new SocialBlockView(this._picture, this._isUserLoggedIn);
 
     this._socialBlockContainer = this._pictureComponent.getElement().querySelector('.social-block-wrapper');
 
@@ -116,28 +119,38 @@ export class PicturePresenter {
     this._changePicture(
         UserAction.DELETE_PICTURE,
         UpdateType.MAJOR,
-        picture
+        picture,
+        UserDataKey.LOADED_PIC
     );
   }
 
   _handleLikeClick(update) {
+    if (!this._isUserLoggedIn) {
+      this._changePicture(
+        UserAction.IF_NOT_LOGGED
+      );
+      return;
+    }
     this._changePicture(
         UserAction.UPDATE_PICTURE,
         UpdateType.NONE,
-        update
-    );
-    this._changePicture(
-      UserAction.UPDATE_USER,
-      UpdateType.NONE,
-      this._userModel.getUpdatedLiked(update)
+        update,
+        UserDataKey.LIKED_PIC
     );
   }
 
   _handleFavoriteClick(update) {
+    if (!this._isUserLoggedIn) {
+      this._changePicture(
+        UserAction.IF_NOT_LOGGED
+      );
+      return;
+    }
     this._changePicture(
       UserAction.UPDATE_USER,
       UpdateType.NONE,
-      this._userModel.getUpdatedFavorites(update)
+      update,
+      UserDataKey.FAVORITE_PIC,
     );
   }
 
