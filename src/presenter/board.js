@@ -1,11 +1,10 @@
 import {NewPicturePresenter} from "./new-picture.js";
 import {PicturePresenter} from "./picture.js";
 import {NoAccessAlertView} from "../view/no-access-alert.js";
-import {UserAction, UpdateType, UserDataKey} from "../const.js";
+import {UserAction, UpdateType} from "../const.js";
 import firebaseApi from "../api.js";
 import userAuthApi from "../userAuthApi.js";
-import {render, RenderPosition} from "../utils/render.js";
-
+import authPresenter from "./auth.js";
 
 export class BoardPresenter {
   constructor(boardContainer, picturesModel, userModel) {
@@ -80,8 +79,7 @@ export class BoardPresenter {
   _handleViewAction(actionType, updateType, update, userDataKeyUpdate) {
     switch(actionType) {
       case UserAction.IF_NOT_LOGGED:
-        const body = document.querySelector('body');
-        render(body, this._noAccessAlertComponent, RenderPosition.AFTERBEGIN);
+        authPresenter.showNoAccess();
       break;
 
       case UserAction.UPDATE_PICTURE:

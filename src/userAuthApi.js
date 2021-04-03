@@ -59,7 +59,7 @@ class UserAuthApi {
   }
 
   showSignIn() {
-    this._authUi.start('#firebaseui-auth-container', {
+     this._authUi.start('#firebaseui-auth-container', {
       callbacks: {
         signInSuccessWithAuthResult: (authResult) => {
           globalThis.authResult = authResult;

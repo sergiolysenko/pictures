@@ -9,6 +9,7 @@ import {UserModel} from "./model/user.js";
 import {SiteHeaderPresenter} from "./presenter/site-header.js";
 import firebaseApi from "./api.js";
 import userAuthApi from "./userAuthApi.js";
+import authPresenter from "./presenter/auth.js";
 
 const headerContainer = document.querySelector('.header');
 const picturesListContainer = document.querySelector('.pictures-list');
@@ -26,7 +27,7 @@ const handleSiteHeaderClick = (menuItem) => {
       userAuthApi.signOut();
       break;
     case MenuItem.SING_IN:
-      userAuthApi.showSignIn();
+      authPresenter.showSignIn();
       break;
   }
 };
@@ -50,6 +51,7 @@ firebase.auth().onAuthStateChanged((user) => {
       userAuthApi.createUserData(globalThis.authResult);
     }
 
+    authPresenter.destroyAuthComponent();
     userAuthApi.getUserData(user)
     .then((userData) => {
       userModel.setUser(userData);

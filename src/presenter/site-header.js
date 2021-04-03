@@ -1,7 +1,7 @@
 import {SiteHeaderView} from "../view/site-header";
 import {HeaderUserOutView} from "../view/header-user-out.js";
 import {remove, render, RenderPosition} from "../utils/render.js";
-import { HeaderUserInView } from "../view/header-user-in";
+import {HeaderUserInView} from "../view/header-user-in";
 
 export class SiteHeaderPresenter {
   constructor(headerContainer, siteHeaerHandler) {
