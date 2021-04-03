@@ -1,5 +1,5 @@
 import {Smart} from "./smart.js";
-import {UserAction, UpdateType} from "../const.js";
+import {UserAction, UpdateType, UserDataKey} from "../const.js";
 
 const BLANK_COMMENT = {
   author: "",
@@ -9,14 +9,14 @@ const BLANK_COMMENT = {
   likeCount: 0,
 }
 
-const createCommentsSection = () => {
+const createCommentsSection = (user) => {
   return `<div>
     <div class="comments-list-wrapper">
       <div class="comments-list pt-4">
       </div>
     </div>
-
-    <form class="flex flex-row items-center">
+    ${user ?
+    `<form class="flex flex-row items-center">
       <div class="flex flex-row items-center w-full border rounded-3xl h-10 px-3 pb-1">
         <div class="w-full">
           <input type="text" class="comment-input border border-transparent w-full focus:outline-none text-sm h-7 flex items-center" placeholder="Write your comment....">
@@ -29,13 +29,15 @@ const createCommentsSection = () => {
           </svg>
         </button>
       </div>
-    </form>
+    </form>` :
+    ""}
   </div>`
 }
 
 export class CommentsSectionView extends Smart {
-  constructor() {
+  constructor(user) {
     super();
+    this._user = user;
     this._data = BLANK_COMMENT;
 
     this._imputCommentHandler = this._imputCommentHandler.bind(this);
@@ -44,7 +46,7 @@ export class CommentsSectionView extends Smart {
   }
 
   getTemplate() {
-    return createCommentsSection();
+    return createCommentsSection(this._user);
   }
 
   restoreHandlers() {
@@ -53,6 +55,9 @@ export class CommentsSectionView extends Smart {
   }
 
   _setInnerHandlers() {
+    if(this._user === null) {
+      return;
+    }
     this.getElement()
       .querySelector(`.comment-input`)
       .addEventListener(`input`, this._imputCommentHandler);
@@ -73,13 +78,18 @@ export class CommentsSectionView extends Smart {
 
     this._callback.submit(
       UserAction.ADD_COMMENT,
-      UpdateType.MAJOR,
-      this._data);
+      UpdateType.MINOR,
+      this._data,
+      UserDataKey.CREATED_COMM
+    );
   }
 
   setSubmitHandler(callback) {
-    this._callback.submit = callback;
+    if(this._user === null) {
+      return;
+    }
 
+    this._callback.submit = callback;
     this.getElement().querySelector('form')
       .addEventListener('submit', this._submitHandler);
   }

@@ -1,7 +1,6 @@
 import firebase from "firebase/app";
 import "firebase/firestore";
 import "firebase/storage";
-import 'firebaseui/dist/firebaseui.css'
 
 const USERS_COLLECTION = 'users';
 const DEFAULT_USER_DATA = {
@@ -13,16 +12,11 @@ const DEFAULT_USER_DATA = {
   createdComm: [],
 }
 
-class UserAuthApi {
+class UserApi {
   constructor() {
-    this._firebaseui = require("firebaseui");
-    this._authUi = new this._firebaseui.auth.AuthUI(firebase.auth());
-    this.authResult = null;
-
     this._firestore = firebase.firestore();
     this._usersCollection = this._firestore.collection(USERS_COLLECTION);
 
-    this.showSignIn = this.showSignIn.bind(this);
     this.createUserData = this.createUserData.bind(this);
   }
 
@@ -58,28 +52,6 @@ class UserAuthApi {
       .catch((error) => console.log(`Something goes wrong! ${error}`));
   }
 
-  showSignIn() {
-     this._authUi.start('#firebaseui-auth-container', {
-      callbacks: {
-        signInSuccessWithAuthResult: (authResult) => {
-          globalThis.authResult = authResult;
-          globalThis.isNewUser = authResult.additionalUserInfo.isNewUser;
-          console.log('User has been logged');
-
-          return false;
-        },
-      },
-      signInOptions: [
-        firebase.auth.EmailAuthProvider.PROVIDER_ID
-      ],
-    });
-  }
-
-  signOut() {
-    firebase.auth().signOut()
-    .then(() => console.log('The user signed out'));
-  }
-
   createUserData(authResult) {
     this._usersCollection.doc(authResult.user.uid).set(DEFAULT_USER_DATA)
     .then(() => {
@@ -99,4 +71,4 @@ class UserAuthApi {
   }
 }
 
-export default new UserAuthApi();
+export default new UserApi();

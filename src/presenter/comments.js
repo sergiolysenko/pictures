@@ -7,7 +7,8 @@ import {CommentView} from "../view/comment.js";
 import {CommentsModel} from "../model/comments.js";
 import {CommentsButtonView} from "../view/show-comments.js";
 import {CommentsContainerView} from "../view/comments-container.js";
-import firebaseApi from "../api.js";
+import ContentDataApi from "../api/content-data.js";
+import UserApi from "../api/user.js";
 
 const COMMENTS_COUNT_PER_STEP = 3;
 
@@ -16,6 +17,7 @@ export class CommentsSectionPresenter {
     this._commentsWrapper = commentsWrapper;
     this._changeMode = changeMode;
     this._userModel = userModel;
+    this._user = this._userModel.getUser();
     this._renderedCommentsCount = COMMENTS_COUNT_PER_STEP;
     this._commentComponent = {};
     this._isCommentsOpen = false;
@@ -47,11 +49,21 @@ export class CommentsSectionPresenter {
     this._commentComponent = {};
   }
 
-  clearCommentsSection() {
+  _getComments() {
+    return this._commentsModel.getComments();
+  }
+
+  clearCommentsSection({resetRenderedCoomentsCount = true} = {}) {
     if (this._isCommentsOpen) {
+      const commentsCount = this._getComments().length;
+
       Object.values(this._commentComponent)
         .forEach((component) => remove(component));
-      this._renderedCommentsCount = COMMENTS_COUNT_PER_STEP;
+
+      if (resetRenderedCoomentsCount) {
+        this._renderedCommentsCount = COMMENTS_COUNT_PER_STEP;
+      }
+
       this._isCommentsOpen = false;
       this._commentsButtonComponent.updateData({isCommentsOpen: false});
       remove(this._commentsContainerComponent)
@@ -62,7 +74,7 @@ export class CommentsSectionPresenter {
   }
 
   _loadPictureComments(currentPicture) {
-    firebaseApi.getComments(currentPicture)
+    ContentDataApi.getComments(currentPicture, this._user)
       .then((comments) => {
         this._commentsModel.setComments(UpdateType.INIT, comments);
       })
@@ -78,22 +90,41 @@ export class CommentsSectionPresenter {
     }
   }
 
-  _handleCommentsViewAction(actionType, updateType, update) {
+  updateUserData(updateType, update, userDataKeyUpdate) {
+    if(!userDataKeyUpdate) {
+      return;
+    }
+    const newUserData = this._userModel.updateUserDataByKey(update, userDataKeyUpdate);
+
+    return UserApi.updateUserData(newUserData).then(() => {
+      this._userModel.updateUser(updateType, newUserData);
+    });
+  }
+
+  _handleCommentsViewAction(actionType, updateType, update, userDataKeyUpdate) {
     switch(actionType) {
       case UserAction.UPDATE_COMMENT:
-        this._commentsModel.updateComment(updateType, update);
+        ContentDataApi.updateComment(update, this._picture)
+        .then(() => {
+          this._commentsModel.updateComment(updateType, update);
+          this.updateUserData(updateType, update, userDataKeyUpdate);
+        })
         break;
 
       case UserAction.ADD_COMMENT:
-        firebaseApi.addComment(update, this._picture)
+        ContentDataApi.addComment(update, this._picture, this._user)
         .then((loadedComment) => {
-          this._commentsModel.addComment(updateType, loadedComment);
+          this.updateUserData(UpdateType.NONE, loadedComment, userDataKeyUpdate).then(() => {
+            this._commentsModel.addComment(updateType, loadedComment);
+          })
         })
         break;
+
       case UserAction.DELETE_COMMENT:
-        firebaseApi.deleteComment(update, this._picture)
+        ContentDataApi.deleteComment(update, this._picture)
         .then(() => {
-          this._commentsModel.deleteComment(updateType, update)
+          this.updateUserData(UpdateType.NONE, update, userDataKeyUpdate);
+          this._commentsModel.deleteComment(updateType, update);
         });
         break;
     }
@@ -101,23 +132,32 @@ export class CommentsSectionPresenter {
 
   _handleCommentsModelEvent(updateType, data) {
     switch (updateType) {
-      case UpdateType.MAJOR:
-        this.clearCommentsSection();
+      case UpdateType.NONE:
+        break;
+
+      case UpdateType.INIT:
         this._renderCommentsSection();
         break;
-      case UpdateType.INIT:
+
+      case UpdateType.MINOR:
+        this.clearCommentsSection({resetRenderedCoomentsCount: false});
+        this._renderCommentsSection();
+        break;
+
+      case UpdateType.MAJOR:
+        this.clearCommentsSection();
         this._renderCommentsSection();
         break;
     }
   }
 
   _handleShowMoreCommentsClick() {
-    const commentsCount = this._comments.length;
+    const commentsCount = this._getComments().length;
     const newRenderedCommentsCount = Math.min(commentsCount, this._renderedCommentsCount + COMMENTS_COUNT_PER_STEP);
-    const comments = this._comments.slice(this._renderedCommentsCount, newRenderedCommentsCount);
+    const comments = this._getComments().slice(this._renderedCommentsCount, newRenderedCommentsCount);
 
     this._renderComments(comments);
-    this._renderedCommentsCount = newRenderedCommentsCount;
+    this._renderedCommentsCount += COMMENTS_COUNT_PER_STEP;
 
     if (this._renderedCommentsCount >= commentsCount) {
       remove(this._showMoreCommentsComponent);
@@ -125,7 +165,7 @@ export class CommentsSectionPresenter {
   }
 
   _renderComment(comment) {
-    const commentComponent = new CommentView(comment);
+    const commentComponent = new CommentView(comment, this._userModel);
     commentComponent.setLikeClickHandler(this._handleCommentsViewAction);
     commentComponent.setDeleteHandler(this._handleCommentsViewAction);
     const commentsList = this._commentsWrapper.querySelector('.comments-list');
@@ -157,10 +197,10 @@ export class CommentsSectionPresenter {
     this._noCommentsComponent = new NoCommentsView();
     this._showMoreCommentsComponent = new ShowMoreCommentsView();
     this._commentsContainerComponent = new CommentsContainerView();
-    this._commentsSectionComponent = new CommentsSectionView();
-    this._comments = this._commentsModel.getComments();
+    this._commentsSectionComponent = new CommentsSectionView(this._user);
 
-    const commentsCount = this._comments.length;
+    const comments = this._getComments();
+    const commentsCount = comments.length;
 
     this._commentsSectionComponent.setSubmitHandler(this._handleCommentsViewAction);
 
@@ -169,9 +209,10 @@ export class CommentsSectionPresenter {
 
     if(!commentsCount) {
       this._renderNoComments();
+      return;
     }
 
-    this._renderComments(this._comments.slice(0, Math.min(commentsCount, this._renderedCommentsCount)));
+    this._renderComments(comments.slice(0, Math.min(commentsCount, this._renderedCommentsCount)));
 
     if (commentsCount > this._renderedCommentsCount) {
       this._renderShowMoreCommentsButton();

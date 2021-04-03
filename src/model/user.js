@@ -39,11 +39,19 @@ export class UserModel extends Observer {
     })
   }
 
-  checkIfPictureIsChangeable(picture) {
+  checkIfUserCanChangePicture(picture) {
     if (this._user === null) {
       return false;
     }
 
     return this._user.loadedPic.some((picId) => picId === picture.id)
+  }
+
+  checkIfUserCanDeleteComment(comment) {
+    if (this._user === null) {
+      return false;
+    }
+
+    return this._user.createdComm.some((commId) => commId === comment.id)
   }
 }

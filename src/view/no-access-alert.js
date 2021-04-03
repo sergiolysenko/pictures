@@ -1,6 +1,4 @@
-import userAuthApi from "../userAuthApi.js";
 import { Smart } from "./smart.js";
-export {AbstractView} from "./abstract.js";
 
 const createNoAcessAlertTemplate = () => {
   return `<div class="absolute z-20 inset-0 overflow-y-auto">

@@ -1,4 +1,4 @@
-import userAuthApi from "../userAuthApi";
+import AuthApi from "../api/auth.js";
 import {NoAccessAlertView} from "../view/no-access-alert.js";
 import {AuthUiWrapperView} from "../view/auth-ui-wrapper.js";
 import {remove, render, RenderPosition} from "../utils/render";
@@ -28,7 +28,7 @@ class AuthPresenter {
 
     render(this._noAccessContainer, this._authUiWrapperComponet, RenderPosition.AFTERBEGIN);
 
-    userAuthApi.showSignIn();
+    AuthApi.showSignIn();
   }
 
   destroyAuthComponent() {

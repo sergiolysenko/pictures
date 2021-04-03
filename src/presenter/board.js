@@ -2,8 +2,8 @@ import {NewPicturePresenter} from "./new-picture.js";
 import {PicturePresenter} from "./picture.js";
 import {NoAccessAlertView} from "../view/no-access-alert.js";
 import {UserAction, UpdateType} from "../const.js";
-import firebaseApi from "../api.js";
-import userAuthApi from "../userAuthApi.js";
+import ContentDataApi from "../api/content-data.js";
+import UserApi from "../api/user.js";
 import authPresenter from "./auth.js";
 
 export class BoardPresenter {
@@ -71,7 +71,7 @@ export class BoardPresenter {
     }
     const newUserData = this._userModel.updateUserDataByKey(update, userDataKeyUpdate);
 
-    userAuthApi.updateUserData(newUserData).then(() => {
+    UserApi.updateUserData(newUserData).then(() => {
       this._userModel.updateUser(updateType, newUserData);
     });
   }
@@ -83,7 +83,7 @@ export class BoardPresenter {
       break;
 
       case UserAction.UPDATE_PICTURE:
-        firebaseApi.updatePicture(update)
+        ContentDataApi.updatePicture(update)
         .then(() => {
           this._picturesModel.updatePicture(updateType, update);
           this.updateUserData(updateType, update, userDataKeyUpdate);
@@ -95,7 +95,7 @@ export class BoardPresenter {
         break;
 
       case UserAction.LOAD_PICTURE:
-        firebaseApi.loadPicture(update, this._userModel.getUser())
+        ContentDataApi.loadPicture(update, this._userModel.getUser())
           .then((loadedData) => {
             this._picturesModel.loadPicture(UpdateType.NONE, loadedData);
             this.updateUserData(updateType, loadedData, userDataKeyUpdate);
@@ -103,7 +103,7 @@ export class BoardPresenter {
         break;
 
       case UserAction.DELETE_PICTURE:
-        firebaseApi.deletePicture(update)
+        ContentDataApi.deletePicture(update)
           .then(() => {
             this._picturesModel.deletePicture(updateType, update);
             this.updateUserData(updateType, update, userDataKeyUpdate);

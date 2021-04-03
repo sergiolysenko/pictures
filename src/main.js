@@ -7,15 +7,19 @@ import {PicturesModel} from "./model/pictures.js";
 import {UpdateType, MenuItem} from "./const.js";
 import {UserModel} from "./model/user.js";
 import {SiteHeaderPresenter} from "./presenter/site-header.js";
-import firebaseApi from "./api.js";
-import userAuthApi from "./userAuthApi.js";
+import ContentDataApi from "./api/content-data.js";
+import UserApi from "./api/user.js";
+import AuthApi from "./api/auth.js";
 import authPresenter from "./presenter/auth.js";
 
 const headerContainer = document.querySelector('.header');
 const picturesListContainer = document.querySelector('.pictures-list');
 
 const handleNewTaskClose = () => {
-  document.querySelector('.load-picture').disabled = false;
+  const loadPictureBtn = document.querySelector('.load-picture');
+  if (loadPictureBtn) {
+    loadPictureBtn.disabled = false;
+  }
 };
 
 const handleSiteHeaderClick = (menuItem) => {
@@ -24,7 +28,7 @@ const handleSiteHeaderClick = (menuItem) => {
       boardPresenter.createPicture(handleNewTaskClose);
       break;
     case MenuItem.SING_OUT:
-      userAuthApi.signOut();
+      AuthApi.signOut();
       break;
     case MenuItem.SING_IN:
       authPresenter.showSignIn();
@@ -41,18 +45,18 @@ const boardPresenter = new BoardPresenter(picturesListContainer, picturesModel, 
 const initApp = () => {
   siteHeaderPresenter.init(userModel);
 
-  firebaseApi.getPictures(userModel.getUser())
+  ContentDataApi.getPictures(userModel.getUser())
   .then((pictures) => picturesModel.setPictures(UpdateType.MAJOR, pictures));
 }
 
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     if (globalThis.isNewUser) {
-      userAuthApi.createUserData(globalThis.authResult);
+      UserApi.createUserData(globalThis.authResult);
     }
 
     authPresenter.destroyAuthComponent();
-    userAuthApi.getUserData(user)
+    UserApi.getUserData(user)
     .then((userData) => {
       userModel.setUser(userData);
       initApp();

@@ -7,21 +7,21 @@ export class SiteHeaderPresenter {
   constructor(headerContainer, siteHeaerHandler) {
     this._headerContainer = headerContainer;
     this._siteHeaderHandler = siteHeaerHandler;
-    this._siteHeaderComponent = new SiteHeaderView();
+    this._siteHeaderComponent = null;
     this._headerUserInComponent = null;
     this._headerUserOutComponent = null;
-
-    this._siteHeaderComponent.setLoadPictureClickHandler(this._siteHeaderHandler);
-
-    render(this._headerContainer, this._siteHeaderComponent, RenderPosition.BEFOREEND);
   }
 
   init(userModel) {
-    if (this._headerUserInComponent !== null || this._headerUserOutComponent !== null) {
+    if (this._siteHeaderComponent !== null) {
       this._clearHeader();
     }
-
     this._user = userModel.getUser();
+
+    this._siteHeaderComponent = new SiteHeaderView(this._user);
+    this._siteHeaderComponent.setLoadPictureClickHandler(this._siteHeaderHandler);
+
+    render(this._headerContainer, this._siteHeaderComponent, RenderPosition.BEFOREEND);
     this._renderHeader();
   }
 
@@ -41,6 +41,7 @@ export class SiteHeaderPresenter {
   }
 
   _clearHeader() {
+    remove(this._siteHeaderComponent);
     remove(this._headerUserInComponent);
     remove(this._headerUserOutComponent);
   }

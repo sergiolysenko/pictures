@@ -34,7 +34,7 @@ export class PicturePresenter {
   init(picture) {
     this._picture = picture;
     this._isUserLoggedIn = this._userModel.getUser() !== null;
-    this._isChangeable = this._userModel.checkIfPictureIsChangeable(this._picture);
+    this._isChangeable = this._userModel.checkIfUserCanChangePicture(this._picture);
 
     const prevPictureComponent = this._pictureComponent;
     const prevPictureEditComponent = this._pictureEditComponent;

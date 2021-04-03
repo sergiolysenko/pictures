@@ -1,8 +1,9 @@
 export const UpdateType = {
   NONE: `NONE`,
+  INIT: `INIT`,
   PATCH: `PATCH`,
+  MINOR: `MINOR`,
   MAJOR: `MAJOR`,
-  INIT: `INIT`
 };
 
 export const UserAction = {
@@ -19,6 +20,7 @@ export const UserAction = {
 export const UserDataKey = {
   LIKED_PIC: `likedPic`,
   LIKED_COMM: `likedComm`,
+  CREATED_COMM: `createdComm`,
   FAVORITE_PIC: `favoritePic`,
   LOADED_PIC: `loadedPic`,
 };

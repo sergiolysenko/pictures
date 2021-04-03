@@ -1,6 +1,6 @@
 import firebase from "firebase/app";
-import {firebaseConfig} from "./firebase-config.js";
-import {uuidv4} from "./utils/common.js";
+import {firebaseConfig} from "../firebase-config.js";
+import {uuidv4} from "../utils/common.js";
 import "firebase/firestore";
 import "firebase/storage";
 import "firebaseui/dist/firebaseui.css";
@@ -53,27 +53,27 @@ class ContentDataApi {
       });
   }
 
-  getComments(picture) {
+  getComments(picture, user) {
     return this._picturesCollection.doc(picture.id)
       .collection(COMMENTS_COLLECTION).get()
       .then((response) => response.docs.map((comment) => {
-        return this.adaptCommentDataToClient(comment)
+        return this.adaptCommentDataToClient(comment, user)
       }));
   }
 
-  addComment(comment, picture) {
+  addComment(comment, picture, user) {
     return this._picturesCollection.doc(picture.id)
-    .collection(COMMENTS_COLLECTION).add(this.adaptCommentDataToServer(comment))
-    .then((docRef) => docRef.get())
-    .then((loadedData) => {
-      return this.adaptCommentDataToClient(loadedData);
-    })
+      .collection(COMMENTS_COLLECTION).add(this.adaptCommentDataToServer(comment, user))
+      .then((docRef) => docRef.get())
+      .then((loadedData) => {
+        return this.adaptCommentDataToClient(loadedData);
+      })
   }
 
-  updateComment(update) {
+  updateComment(update, picture) {
     return this._picturesCollection.doc(picture.id)
       .collection(COMMENTS_COLLECTION).doc(update.id)
-      .set(update);
+      .set(this.adaptCommentDataToServer(update));
   }
 
   deleteComment(comment, picture) {
@@ -95,7 +95,6 @@ class ContentDataApi {
           id: picture.id,
           isLiked: user ? user.likedPic.some((item) => item === picture.id) : false,
           isFavorite: user ? user.favoritePic.some((item) => item === picture.id) : false,
-          isUserCanModify: user ? user.loadedPic.some((item) => item === picture.id) : false,
         }
       )
   }
@@ -108,19 +107,18 @@ class ContentDataApi {
     delete adaptedData.isLiked;
     delete adaptedData.isFavorite;
     delete adaptedData.id;
-    delete adaptedData.isUserCanModify;
 
     return adaptedData;
   }
 
-  adaptCommentDataToClient(comment) {
+  adaptCommentDataToClient(comment, user) {
     return Object.assign({}, comment.data(), {
       id: comment.id,
-      /* isLiked: user ? user.likedComm.some((item) => item === comment.id) : false, */
+      isLiked: user ? user.likedComm.some((item) => item === comment.id) : false,
     })
   }
 
-  adaptCommentDataToServer(comment) {
+  adaptCommentDataToServer(comment, user) {
     const adaptedData = Object.assign({}, comment, user ? {
       author: user.name,
       avatar: user.avatar,
