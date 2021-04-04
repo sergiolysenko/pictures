@@ -4,6 +4,7 @@ import {SocialBlockView} from "../view/social-block.js";
 import {render, remove, RenderPosition, replace} from "../utils/render.js";
 import {UpdateType, UserAction, UserDataKey} from "../const.js";
 import {CommentsSectionPresenter} from "./comments.js";
+import authPresenter from "./auth.js";
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -131,6 +132,7 @@ export class PicturePresenter {
       );
       return;
     }
+    authPresenter.showLoading(this._pictureComponent, {isSmall: true});
     this._changePicture(
         UserAction.UPDATE_PICTURE,
         UpdateType.NONE,
@@ -146,6 +148,7 @@ export class PicturePresenter {
       );
       return;
     }
+    authPresenter.showLoading(this._pictureComponent, {isSmall: true});
     this._changePicture(
       UserAction.UPDATE_USER,
       UpdateType.NONE,

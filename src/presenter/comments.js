@@ -9,6 +9,7 @@ import {CommentsButtonView} from "../view/show-comments.js";
 import {CommentsContainerView} from "../view/comments-container.js";
 import ContentDataApi from "../api/content-data.js";
 import UserApi from "../api/user.js";
+import authPresenter from "./auth.js";
 
 const COMMENTS_COUNT_PER_STEP = 3;
 
@@ -87,8 +88,9 @@ export class CommentsSectionPresenter {
       this.clearCommentsSection();
     } else {
       this._changeMode();
-      this._loadPictureComments(this._picture);
+      authPresenter.showLoading(this._commentsButtonComponent, {isSmall: true})
       this._isCommentsOpen = true;
+      this._loadPictureComments(this._picture);
     }
   }
 
@@ -98,7 +100,7 @@ export class CommentsSectionPresenter {
     }
     const newUserData = this._userModel.updateUserDataByKey(update, userDataKeyUpdate);
 
-    UserApi.updateUserData(newUserData).then(() => {
+    return UserApi.updateUserData(newUserData).then(() => {
       this._userModel.updateUser(updateType, newUserData);
     });
   }
@@ -106,27 +108,33 @@ export class CommentsSectionPresenter {
   _handleCommentsViewAction(actionType, updateType, update, userDataKeyUpdate) {
     switch(actionType) {
       case UserAction.UPDATE_COMMENT:
+        authPresenter.showLoading(this._commentComponent[update.id], {isSmall: true});
         ContentDataApi.updateComment(update, this._picture)
         .then(() => {
           this._commentsModel.updateComment(updateType, update);
           this.updateUserData(updateType, update, userDataKeyUpdate);
+          authPresenter.destroyLoading();
         })
         break;
 
       case UserAction.ADD_COMMENT:
+        authPresenter.showLoading(this._commentsButtonComponent, {isSmall: true});
         ContentDataApi.addComment(update, this._picture, this._user)
         .then((loadedComment) => {
           this.updateUserData(UpdateType.NONE, loadedComment, userDataKeyUpdate).then(() => {
             this._commentsModel.addComment(updateType, loadedComment);
+            authPresenter.destroyLoading();
           })
         })
         break;
 
       case UserAction.DELETE_COMMENT:
+        authPresenter.showLoading(this._commentComponent[update.id], {isSmall: true});
         ContentDataApi.deleteComment(update, this._picture)
         .then(() => {
           this.updateUserData(UpdateType.NONE, update, userDataKeyUpdate);
           this._commentsModel.deleteComment(updateType, update);
+          authPresenter.destroyLoading();
         });
         break;
     }
@@ -138,6 +146,7 @@ export class CommentsSectionPresenter {
         break;
 
       case UpdateType.INIT:
+        authPresenter.destroyLoading();
         this._renderCommentsSection();
         break;
 

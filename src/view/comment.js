@@ -6,7 +6,7 @@ const createComment = (comment, user, isUserCanDelete) => {
   const {avatar, author, text, time, likeCount, isLiked} = comment;
   const isLikesShowing = !!likeCount;
 
-  return `<div class="flex items-center space-x-2 mb-3">
+  return `<div class="flex items-center mb-3 relative">
     <div class="group relative flex flex-shrink-0 self-start">
       <img class="h-8 w-8 object-fill rounded-full"
         src=${avatar}

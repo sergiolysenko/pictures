@@ -52,6 +52,11 @@ export class BoardPresenter {
   }
 
   _renderBoard() {
+    if (this._isLoading) {
+      this._renderLoading();
+      return;
+    }
+
     const pictures = this._picturesModel.getPictures();
     this._renderPictures(pictures);
   }
@@ -73,6 +78,7 @@ export class BoardPresenter {
 
     UserApi.updateUserData(newUserData).then(() => {
       this._userModel.updateUser(updateType, newUserData);
+      authPresenter.destroyLoading();
     });
   }
 
@@ -87,6 +93,7 @@ export class BoardPresenter {
         .then(() => {
           this._picturesModel.updatePicture(updateType, update);
           this.updateUserData(updateType, update, userDataKeyUpdate);
+          authPresenter.destroyLoading();
         })
         break;
 

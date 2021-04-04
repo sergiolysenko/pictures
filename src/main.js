@@ -42,12 +42,15 @@ const picturesModel = new PicturesModel();
 const siteHeaderPresenter = new SiteHeaderPresenter(headerContainer, handleSiteHeaderClick);
 const boardPresenter = new BoardPresenter(picturesListContainer, picturesModel, userModel);
 
-
 const initApp = () => {
   siteHeaderPresenter.init(userModel);
+  authPresenter.showLoading(picturesListContainer);
 
   ContentDataApi.getPictures(userModel.getUser())
-  .then((pictures) => picturesModel.setPictures(UpdateType.MAJOR, pictures));
+  .then((pictures) => {
+    picturesModel.setPictures(UpdateType.MAJOR, pictures)
+    authPresenter.destroyLoading();
+  });
 }
 
 firebase.auth().onAuthStateChanged((user) => {

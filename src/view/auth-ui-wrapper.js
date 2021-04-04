@@ -1,7 +1,7 @@
 import {Smart} from "./smart";
 
 const createAuthUiWrapperTemplate = () => {
-  return `<div class="absolute z-20 inset-0 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  return `<div class="absolute z-20 inset-0 overflow-hidden">
     <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:p-0">
       <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
       <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>

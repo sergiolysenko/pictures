@@ -3,7 +3,7 @@ import { AbstractView } from "./abstract.js";
 const createPictureTemplate = (picture, isChangeable) => {
   const {src, title, author} = picture;
 
-  return `<section class="picture">
+  return `<section class="picture relative">
   <div class="grid">
     <div class="w-full h-80 relative">
       <button class="edit absolute flex items-center justify-center right-4 bottom-4 z-20 ${isChangeable ? "" : "hidden"}">
