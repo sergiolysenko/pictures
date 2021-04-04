@@ -16,33 +16,10 @@ class UserApi {
   constructor() {
     this._firestore = firebase.firestore();
     this._usersCollection = this._firestore.collection(USERS_COLLECTION);
-
-    this.createUserData = this.createUserData.bind(this);
   }
 
   getCurrentUser() {
     return this.getUserData(firebase.auth().currentUser);
-  }
-
-  getUserData(firebaseUser) {
-    return this._usersCollection.doc(firebaseUser.uid).get()
-    .then((userDoc) => {
-      const userData = userDoc.data();
-
-      return {
-         id: firebaseUser.uid,
-         name: firebaseUser.displayName,
-         avatar: userData.avatar,
-         favoritePic: userData.favoritePic,
-         likedComm: userData.likedComm,
-         likedPic: userData.likedPic,
-         loadedPic: userData.loadedPic,
-         createdComm: userData.createdComm,
-       }
-     })
-     .catch((error) => {
-       throw new Error(`Can't find user with ${firebaseUser.uid}, or it's ${error}`)
-     });
   }
 
   updateUserData(data) {
@@ -52,12 +29,30 @@ class UserApi {
       .catch((error) => console.log(`Something goes wrong! ${error}`));
   }
 
-  createUserData(authResult) {
-    this._usersCollection.doc(authResult.user.uid).set(DEFAULT_USER_DATA)
-    .then(() => {
-      console.log("New user data has been created successfully");
+  getUserData(firebaseUser) {
+    const currentUserDocRef = this._usersCollection.doc(firebaseUser.uid);
+
+    return currentUserDocRef.get().then((response) => {
+      if(response.exists) {
+        console.log(`Welcome back ${firebaseUser.displayName}`);
+        return this.adaptUserDataToClient(response.data(), firebaseUser);
+      } else {
+        return currentUserDocRef.set(DEFAULT_USER_DATA).then(() => {
+          console.log("New user data has been created successfully");
+          return this.adaptUserDataToClient(DEFAULT_USER_DATA, firebaseUser);;
+        }).catch((error) => {
+          throw new Error(`Error while creating user data - ${error}`)
+        })
+      }
     }).catch((error) => {
-      throw new Error(`Error while creating user data - ${error}`)
+      throw new Error(`The current user data not exist - ${error}`)
+    })
+  }
+
+  adaptUserDataToClient(data, firebaseUser) {
+    return Object.assign({}, data, {
+      id: firebaseUser.uid,
+      name: firebaseUser.displayName,
     })
   }
 

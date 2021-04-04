@@ -17,7 +17,7 @@ export class CommentsSectionPresenter {
     this._commentsWrapper = commentsWrapper;
     this._changeMode = changeMode;
     this._userModel = userModel;
-    this._user = this._userModel.getUser();
+
     this._renderedCommentsCount = COMMENTS_COUNT_PER_STEP;
     this._commentComponent = {};
     this._isCommentsOpen = false;
@@ -74,6 +74,8 @@ export class CommentsSectionPresenter {
   }
 
   _loadPictureComments(currentPicture) {
+    this._user = this._userModel.getUser();
+
     ContentDataApi.getComments(currentPicture, this._user)
       .then((comments) => {
         this._commentsModel.setComments(UpdateType.INIT, comments);
@@ -96,7 +98,7 @@ export class CommentsSectionPresenter {
     }
     const newUserData = this._userModel.updateUserDataByKey(update, userDataKeyUpdate);
 
-    return UserApi.updateUserData(newUserData).then(() => {
+    UserApi.updateUserData(newUserData).then(() => {
       this._userModel.updateUser(updateType, newUserData);
     });
   }

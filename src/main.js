@@ -1,5 +1,6 @@
 import "tailwindcss/tailwind.css";
 import "./img/logo-pictures.png";
+import "./img/default-user-avatar.png";
 import "./style.css";
 import firebase from "firebase/app";
 import {BoardPresenter} from "./presenter/board.js";
@@ -51,10 +52,6 @@ const initApp = () => {
 
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
-    if (globalThis.isNewUser) {
-      UserApi.createUserData(globalThis.authResult);
-    }
-
     authPresenter.destroyAuthComponent();
     UserApi.getUserData(user)
     .then((userData) => {

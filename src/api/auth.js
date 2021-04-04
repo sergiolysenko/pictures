@@ -11,8 +11,6 @@ class AuthApi {
      this._authUi.start('#firebaseui-auth-container', {
       callbacks: {
         signInSuccessWithAuthResult: (authResult) => {
-          globalThis.authResult = authResult;
-          globalThis.isNewUser = authResult.additionalUserInfo.isNewUser;
           console.log('User has been logged');
 
           return false;

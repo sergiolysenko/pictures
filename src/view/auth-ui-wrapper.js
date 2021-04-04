@@ -7,7 +7,7 @@ const createAuthUiWrapperTemplate = () => {
       <span class="hidden sm:inline-block sm:align-middle sm:h-screen">&#8203;</span>
       <div class="fixed sm:max-w-lg sm:w-full">
         <div id="firebaseui-auth-container" class="relative">
-          <button type="button" class="close-auth-btn absolute right-24 top-4 z-20 w-5">
+          <button type="button" class="close-auth-btn absolute right-4 sm:right-24 top-4 z-20 w-5">
           <svg class="svg-icon" viewBox="0 0 20 20">
 							<path fill="red" d="M11.469,10l7.08-7.08c0.406-0.406,0.406-1.064,0-1.469c-0.406-0.406-1.063-0.406-1.469,0L10,8.53l-7.081-7.08
 							c-0.406-0.406-1.064-0.406-1.469,0c-0.406,0.406-0.406,1.063,0,1.469L8.531,10L1.45,17.081c-0.406,0.406-0.406,1.064,0,1.469
