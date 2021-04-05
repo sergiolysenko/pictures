@@ -10,7 +10,7 @@ const BLANK_PICTURE = {
 const createNewPictureTemplate = (picture) => {
   const {id = "", src = null, title} = picture;
 
-  return `<section class="load-new-picture">
+  return `<section class="load-new-picture relative">
   <form class="bg-white h-full p7 rounded-lg mx-auto">
     <div class="h-full relative flex flex-col p-4 pb-3 text-gray-400 border border-gray-200 rounded-lg">
         <div class="h-full mb-3 relative flex flex-col justify-center text-gray-400 border border-gray-200 border-dashed rounded">

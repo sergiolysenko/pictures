@@ -1,6 +1,7 @@
 import {render, remove, RenderPosition} from "../utils/render.js";
 import {NewPictureView} from "../view/new-picture.js";
 import {UserAction, UpdateType, UserDataKey} from "../const.js";
+import authPresenter from "./auth.js";
 
 export class NewPicturePresenter {
   constructor(picturesContainer, changeData, userModel) {
@@ -45,6 +46,7 @@ export class NewPicturePresenter {
   }
 
   _handleFormSubmit(picture) {
+    authPresenter.showLoading(this._newPictureComponent, {isSmall: true});
     this._changeData(
         UserAction.LOAD_PICTURE,
         UpdateType.MAJOR,

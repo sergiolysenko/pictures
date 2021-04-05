@@ -2,6 +2,7 @@ import "tailwindcss/tailwind.css";
 import "./img/logo-pictures.png";
 import "./img/default-user-avatar.png";
 import "./style.css";
+import "./firebase-initialize.js";
 import firebase from "firebase/app";
 import {BoardPresenter} from "./presenter/board.js";
 import {PicturesModel} from "./model/pictures.js";

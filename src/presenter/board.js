@@ -106,6 +106,7 @@ export class BoardPresenter {
           .then((loadedData) => {
             this._picturesModel.loadPicture(UpdateType.NONE, loadedData);
             this.updateUserData(updateType, loadedData, userDataKeyUpdate);
+            authPresenter.destroyLoading();
           })
         break;
 
@@ -114,6 +115,7 @@ export class BoardPresenter {
           .then(() => {
             this._picturesModel.deletePicture(updateType, update);
             this.updateUserData(updateType, update, userDataKeyUpdate);
+            authPresenter.destroyLoading();
           })
         break;
     }

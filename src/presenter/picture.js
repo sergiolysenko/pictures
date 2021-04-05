@@ -117,6 +117,7 @@ export class PicturePresenter {
   }
 
   _handleDeleteClick(picture) {
+    authPresenter.showLoading(this._pictureEditComponent, {isSmall: true});
     this._changePicture(
         UserAction.DELETE_PICTURE,
         UpdateType.MAJOR,

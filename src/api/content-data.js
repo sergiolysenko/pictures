@@ -1,5 +1,4 @@
 import firebase from "firebase/app";
-import {firebaseConfig} from "../firebase-config.js";
 import {uuidv4} from "../utils/common.js";
 import "firebase/firestore";
 import "firebase/storage";
@@ -10,8 +9,6 @@ const COMMENTS_COLLECTION = 'comments';
 
 class ContentDataApi {
   constructor() {
-    firebase.initializeApp(firebaseConfig);
-
     this._storage = firebase.storage();
     this._firestore = firebase.firestore();
     this._picturesCollection = this._firestore.collection(PICTURE_COLLECTION);
