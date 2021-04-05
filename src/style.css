@@ -1,3 +1,9 @@
+@font-face {
+  font-family: "Brushwell";
+  src: url("./fonts/brushwell.woff2") format("woff2");
+  font-weight: 400;
+}
+
 .favorite:checked + svg {
   transform: scale(1.2);
 }

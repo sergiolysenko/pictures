@@ -21,7 +21,7 @@ const createSocialBlockTemplate = (picture) => {
                 d="M16 4v12l-4-2-4 2V4M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </label>
-          <label class="flex-none flex items-center justify-center cursor-pointer hover:text-red-500">
+          <label class="flex-none flex items-center justify-center cursor-pointer hover:text-red-500 ml-2 sm:ml-1">
             <input class="like appearance-none" type="checkbox" aria-label="like" ${isLiked ? `checked`: ``}>
             <svg class="flex-shrink-0" width="25" height="25" viewBox="0 0 20 20" fill="currentColor">
               <path fill-rule="evenodd" clip-rule="evenodd"

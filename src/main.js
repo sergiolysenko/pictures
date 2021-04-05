@@ -1,18 +1,19 @@
 import "tailwindcss/tailwind.css";
 import "./img/logo-pictures.png";
 import "./img/default-user-avatar.png";
+import "./fonts/brushwell.woff2";
 import "./style.css";
-import "./firebase-initialize.js";
+import "./js/firebase-initialize.js";
 import firebase from "firebase/app";
-import {BoardPresenter} from "./presenter/board.js";
-import {PicturesModel} from "./model/pictures.js";
-import {UpdateType, MenuItem} from "./const.js";
-import {UserModel} from "./model/user.js";
-import {SiteHeaderPresenter} from "./presenter/site-header.js";
-import ContentDataApi from "./api/content-data.js";
-import UserApi from "./api/user.js";
-import AuthApi from "./api/auth.js";
-import authPresenter from "./presenter/auth.js";
+import UserApi from "./js/api/user.js";
+import AuthApi from "./js/api/auth.js";
+import ContentDataApi from "./js/api/content-data.js";
+import authPresenter from "./js/presenter/auth.js";
+import {BoardPresenter} from "./js/presenter/board.js";
+import {PicturesModel} from "./js/model/pictures.js";
+import {SiteHeaderPresenter} from "./js/presenter/site-header.js";
+import {UpdateType, MenuItem} from "./js/const.js";
+import {UserModel} from "./js/model/user.js";
 
 const headerContainer = document.querySelector('.header');
 const picturesListContainer = document.querySelector('.pictures-list');
@@ -62,7 +63,6 @@ firebase.auth().onAuthStateChanged((user) => {
       userModel.setUser(userData);
       initApp();
     });
-
   }
   else {
     userModel.setUser(null);

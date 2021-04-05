@@ -3,8 +3,8 @@ import {Smart} from "./smart.js";
 const createCommentsButtonTemplate = (data) => {
   const {isCommentsOpen} = data;
 
-  return `<div class="flex justify-center">
-        <button class="comments-btn font-medium text-sm" type="button">${isCommentsOpen ? `Hide` : `Show`} comments</button>
+  return `<div class="flex justify-center py-2">
+        <button class="comments-btn font-medium text-base sm:text-sm" type="button">${isCommentsOpen ? `Hide` : `Show`} comments</button>
       </div>`
 }
 

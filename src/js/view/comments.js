@@ -23,8 +23,8 @@ const createCommentsSection = (user) => {
         </div>
       </div>
       <div class="ml-1">
-        <button class="flex items-center justify-center h-10 w-10 rounded-full bg-gray-200 hover:bg-gray-300 text-indigo-800 text-white" type="submit">
-          <svg class="w-5 h-5 transform rotate-90 -mr-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        <button class="flex items-center justify-center h-12 w-12 sm:h-10 sm:w-10 rounded-full bg-gray-200 hover:bg-gray-300 text-indigo-800 text-white" type="submit">
+          <svg class="w-7 h-7 sm:w-5 sm:h-5 transform rotate-90 -mr-px" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
           </svg>
         </button>

@@ -3,12 +3,12 @@ import {MenuItem} from "../const.js";
 
 const createSiteHeaderTemplate = (user) => {
   return `<nav class="bg-gray-800">
-    <div class="max-w-7xl mx-auto px-2 sm:px-6 lg:px-8">
+    <div class="max-w-7xl mx-auto px-6 lg:px-8">
       <div class="header-user-nav relative flex items-center justify-between h-16">
         <div class="flex justify-start">
           <div class="flex-shrink-0 flex items-center">
-            <img class="block h-8 w-auto" src="./img/logo-pictures.png" alt="photos">
-            <p class="hidden ml-2 sm:block w-auto text-sm font-medium text-white font-serif">Share your pictures - share your
+            <img class="block h-10 w-auto" src="./img/logo-pictures.png" alt="photos">
+            <p class="hidden ml-2 w-auto text-2xl text-white font-brushwell sm:block md:text-3xl">Share your pictures - share your
               mood!</p>
           </div>
         </div>

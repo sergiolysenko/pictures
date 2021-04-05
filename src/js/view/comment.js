@@ -16,17 +16,17 @@ const createComment = (comment, user, isUserCanDelete) => {
       <div class="block">
         <div class="bg-gray-100 w-auto rounded-xl px-2 pb-2">
           <div class="font-medium">
-            <div class="text-sm">
+            <div class="text-lg sm:text-sm">
               <small>${author}</small>
             </div>
           </div>
-          <div class="text-xs">
+          <div class="text-sm sm:text-xs">
             ${text}
           </div>
         </div>
-        <div class="flex justify-start items-center text-xs w-full">
+        <div class="flex justify-start items-center text-base sm:text-xs w-full">
           <div class="font-semibold text-gray-700 px-2 flex items-center justify-center space-x-1">
-            <div class="flex items-center text-xs">
+            <div class="flex items-center">
             ${isLikesShowing ? `
               ${likeCount}
               <svg class="flex-shrink-0 h-3 w-3" width="5" height="5" fill="currentColor" viewBox="0 0 20 20">

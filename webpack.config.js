@@ -16,12 +16,10 @@ module.exports = {
   devServer: {
     contentBase: path.join(__dirname, `public`),
     open: true,
-    // hot: true,
     port: 8090,
   },
 
   plugins: [
-    // new webpack.HotModuleReplacementPlugin(),
     new CleanWebpackPlugin(),
     new HtmlWebpackPlugin({
       template: './index.html',
@@ -62,6 +60,14 @@ module.exports = {
       }]
     }, {
       test: /\.(png|jpe?g|webp)$/,
+      use: [{
+        loader: 'file-loader',
+        options: {
+          name: '[path][name].[ext]',
+        }
+      }]
+    }, {
+      test: /\.(ttf|woff|woff2)$/,
       use: [{
         loader: 'file-loader',
         options: {
