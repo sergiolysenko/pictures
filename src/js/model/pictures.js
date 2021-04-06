@@ -84,6 +84,10 @@ export class PicturesModel extends Observer {
   }
 
   updateUserPictures(update, key) {
+    if (!key) {
+      return;
+    }
+
     const userPictureIndex = this._userPictures[key].findIndex((picture) => picture.id === update.id);
 
     if (userPictureIndex === -1) {

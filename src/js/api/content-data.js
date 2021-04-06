@@ -117,6 +117,7 @@ class ContentDataApi {
   adaptPictureDataToServer(data, user) {
     const adaptedData = Object.assign({}, data, user ? {
       author: user.name,
+      authorId: user.id,
     } : {});
     delete adaptedData.id;
 
@@ -133,6 +134,7 @@ class ContentDataApi {
   adaptCommentDataToServer(comment, user) {
     const adaptedData = Object.assign({}, comment, user ? {
       author: user.name,
+      authorId: user.id,
       avatar: user.avatar,
       time: new Date(),
     } : {});

@@ -106,7 +106,7 @@ export class PicturePresenter {
     this._changePicture(
         UserAction.UPDATE_PICTURE,
         UpdateType.PATCH,
-        update
+        this._deleteUserData(update),
     );
   }
 
