@@ -1,3 +1,4 @@
+import {UserDataKey} from "../const.js";
 import {Observer} from "../utils/observer.js";
 
 export class UserModel extends Observer {
@@ -34,6 +35,13 @@ export class UserModel extends Observer {
   }
 
   updateUserDataByKey(update, key) {
+    if (key === UserDataKey.LOADED_PIC) {
+      this._user = Object.assign({}, this._user, {
+        likedPic: this._user.likedPic.filter((id) => id !== update.id),
+        favoritePic: this._user.favoritePic.filter((id) => id !== update.id),
+      })
+    }
+
     return Object.assign({}, this._user, {
       [key]: this._update(this._user[key], update.id)
     })

@@ -1,10 +1,12 @@
 import {NewPicturePresenter} from "./new-picture.js";
-import {PicturePresenter} from "./picture.js";
 import {NoAccessAlertView} from "../view/no-access-alert.js";
-import {UserAction, UpdateType} from "../const.js";
+import {PicturePresenter} from "./picture.js";
+import {profileSectionView} from "../view/profile-section";
 import ContentDataApi from "../api/content-data.js";
 import UserApi from "../api/user.js";
 import authPresenter from "./auth.js";
+import {UserAction, UpdateType, SectionTitle, MenuItem} from "../const.js";
+import {remove, render, RenderPosition} from "../utils/render.js";
 
 export class BoardPresenter {
   constructor(boardContainer, picturesModel, userModel) {
@@ -12,6 +14,11 @@ export class BoardPresenter {
     this._picturePresenter = {};
     this._picturesModel = picturesModel;
     this._userModel = userModel;
+    this._currentPage = MenuItem.MAIN;
+
+    this._favoritesSectionComponent = new profileSectionView({title: SectionTitle.FAVORITE_PIC});
+    this._likedSectionComponent = new profileSectionView({title: SectionTitle.LIKED_PIC});
+    this._loadedSectionComponent = new profileSectionView({title: SectionTitle.LOADED_PIC});
 
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
@@ -33,6 +40,31 @@ export class BoardPresenter {
     this._newPicturePresenter.init(callback);
   }
 
+  renderProfilePage() {
+    const userPictures = this._picturesModel.getUserPictures();
+    this._currentPage = MenuItem.PROFILE;
+
+    this._renderSection(userPictures.favoritePic, this._favoritesSectionComponent);
+    this._renderSection(userPictures.likedPic, this._likedSectionComponent);
+    this._renderSection(userPictures.loadedPic, this._loadedSectionComponent);
+  }
+
+  destroyProfilePage() {
+    remove(this._favoritesSectionComponent);
+    remove(this._likedSectionComponent);
+    remove(this._loadedSectionComponent);
+    this._currentPage = MenuItem.MAIN;
+  }
+
+  _renderSection(pictures, sectionComponent) {
+    if (!pictures.length) {
+      return;
+    }
+    const profilePageContainer = document.querySelector('.profile-page');
+    this._renderPictures(pictures, sectionComponent);
+    render(profilePageContainer, sectionComponent, RenderPosition.BEFOREEND);
+  }
+
   _handleModeChange() {
     this._newPicturePresenter.destroy();
     Object
@@ -40,15 +72,19 @@ export class BoardPresenter {
       .forEach((presenter) => presenter.resetView());
   }
 
-  _renderPicture(picture) {
-    const picturePresenter = new PicturePresenter(this._boardContainer, this._handleModeChange, this._handleViewAction, this._userModel);
+  _renderPicture(picture, container) {
+    if (!picture.src) {
+      return;
+    }
+
+    const picturePresenter = new PicturePresenter(container, this._handleModeChange, this._handleViewAction, this._userModel);
 
     picturePresenter.init(picture);
     this._picturePresenter[picture.id] = picturePresenter;
   }
 
-  _renderPictures(pictures) {
-    pictures.forEach((picture) => this._renderPicture(picture));
+  _renderPictures(pictures, container) {
+    pictures.forEach((picture) => this._renderPicture(picture, container));
   }
 
   _renderBoard() {
@@ -58,10 +94,10 @@ export class BoardPresenter {
     }
 
     const pictures = this._picturesModel.getPictures();
-    this._renderPictures(pictures);
+    this._renderPictures(pictures, this._boardContainer);
   }
 
-  _clearBoard() {
+  clearBoard() {
     this._newPicturePresenter.destroy();
 
     Object.values(this._picturePresenter)
@@ -91,7 +127,7 @@ export class BoardPresenter {
       case UserAction.UPDATE_PICTURE:
         ContentDataApi.updatePicture(update)
         .then(() => {
-          this._picturesModel.updatePicture(updateType, update);
+          this._picturesModel.updatePicture(updateType, update, userDataKeyUpdate);
           this.updateUserData(updateType, update, userDataKeyUpdate);
           authPresenter.destroyLoading();
         })
@@ -99,12 +135,13 @@ export class BoardPresenter {
 
       case UserAction.UPDATE_USER:
         this.updateUserData(updateType, update, userDataKeyUpdate);
+        this._picturesModel.updateUserPictures(update, userDataKeyUpdate);
         break;
 
       case UserAction.LOAD_PICTURE:
         ContentDataApi.loadPicture(update, this._userModel.getUser())
           .then((loadedData) => {
-            this._picturesModel.loadPicture(UpdateType.NONE, loadedData);
+            this._picturesModel.loadPicture(UpdateType.NONE, loadedData, userDataKeyUpdate);
             this.updateUserData(updateType, loadedData, userDataKeyUpdate);
             authPresenter.destroyLoading();
           })
@@ -113,7 +150,7 @@ export class BoardPresenter {
       case UserAction.DELETE_PICTURE:
         ContentDataApi.deletePicture(update)
           .then(() => {
-            this._picturesModel.deletePicture(updateType, update);
+            this._picturesModel.deletePicture(updateType, update, userDataKeyUpdate);
             this.updateUserData(updateType, update, userDataKeyUpdate);
             authPresenter.destroyLoading();
           })
@@ -122,6 +159,12 @@ export class BoardPresenter {
   }
 
   _handleModelEvent(updateType, data) {
+    if (this._currentPage === MenuItem.PROFILE) {
+      this.destroyProfilePage();
+      this.renderProfilePage();
+      return;
+    }
+
     switch (updateType) {
       case UpdateType.NONE:
         break;
@@ -129,7 +172,7 @@ export class BoardPresenter {
         this._picturePresenter[data.id].init(data);
         break;
       case UpdateType.MAJOR:
-        this._clearBoard();
+        this.clearBoard();
         this._renderBoard();
         break;
       case UpdateType.INIT:

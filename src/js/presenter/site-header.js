@@ -12,14 +12,16 @@ export class SiteHeaderPresenter {
     this._headerUserOutComponent = null;
   }
 
-  init(userModel) {
+  init(userModel, choosenMenuItem) {
     if (this._siteHeaderComponent !== null) {
       this._clearHeader();
     }
     this._user = userModel.getUser();
+    this._choosenMenuItem = choosenMenuItem;
 
-    this._siteHeaderComponent = new SiteHeaderView(this._user);
+    this._siteHeaderComponent = new SiteHeaderView(this._user, this._choosenMenuItem);
     this._siteHeaderComponent.setLoadPictureClickHandler(this._siteHeaderHandler);
+    this._siteHeaderComponent.setLogoClickHandler(this._siteHeaderHandler);
 
     render(this._headerContainer, this._siteHeaderComponent, RenderPosition.BEFOREEND);
     this._renderHeader();
@@ -35,8 +37,9 @@ export class SiteHeaderPresenter {
       return;
     }
 
-    this._headerUserInComponent = new HeaderUserInView(this._user);
+    this._headerUserInComponent = new HeaderUserInView(this._user, this._choosenMenuItem);
     this._headerUserInComponent.setSignOutClickHandler(this._siteHeaderHandler);
+    this._headerUserInComponent.setProfileClickHandler(this._siteHeaderHandler);
     render(userNavContainer, this._headerUserInComponent, RenderPosition.BEFOREEND);
   }
 

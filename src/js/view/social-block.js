@@ -2,7 +2,6 @@ import {Smart} from "./smart.js";
 
 const createSocialBlockTemplate = (picture) => {
   const {likes, isFavorite, isLiked} = picture;
-
   return `<div class="flex">
           <div class="flex items-center text-sm font-medium">
             <div class="">
@@ -32,10 +31,9 @@ const createSocialBlockTemplate = (picture) => {
 }
 
 export class SocialBlockView extends Smart {
-  constructor(picture, isUserLoggedIn) {
+  constructor(picture) {
     super();
     this._data = picture;
-    this._isUserLoggedIn = isUserLoggedIn;
 
     this._likeClickHandler = this._likeClickHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
@@ -51,7 +49,7 @@ export class SocialBlockView extends Smart {
   }
 
   _likeClickHandler(evt) {
-    if (this._isUserLoggedIn) {
+    if (this._data.isUserLoggedIn) {
       const sign = evt.target.checked ? 1 : -1;
       this.updateData({
         likes: this._data.likes + sign,
@@ -63,7 +61,7 @@ export class SocialBlockView extends Smart {
   }
 
   _favoriteClickHandler(evt) {
-    if (this._isUserLoggedIn) {
+    if (this._data.isUserLoggedIn) {
       this.updateData({
         isFavorite: !this._data.isFavorite,
       });

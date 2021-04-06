@@ -33,16 +33,15 @@ export class PicturePresenter {
   }
 
   init(picture) {
-    this._picture = picture;
-    this._isUserLoggedIn = this._userModel.getUser() !== null;
-    this._isChangeable = this._userModel.checkIfUserCanChangePicture(this._picture);
+    this._user = this._userModel.getUser();
+    this._picture = this._modifyPictureDataWithUserData(picture, this._user);
 
     const prevPictureComponent = this._pictureComponent;
     const prevPictureEditComponent = this._pictureEditComponent;
 
     this._pictureComponent = new PictureView(this._picture, this._isChangeable);
     this._pictureEditComponent = new NewPictureView(this._picture);
-    this._socialBlockComponent = new SocialBlockView(this._picture, this._isUserLoggedIn);
+    this._socialBlockComponent = new SocialBlockView(this._picture);
 
     this._socialBlockContainer = this._pictureComponent.getElement().querySelector('.social-block-wrapper');
 
@@ -121,13 +120,13 @@ export class PicturePresenter {
     this._changePicture(
         UserAction.DELETE_PICTURE,
         UpdateType.MAJOR,
-        picture,
+        this._deleteUserData(picture),
         UserDataKey.LOADED_PIC
     );
   }
 
   _handleLikeClick(update) {
-    if (!this._isUserLoggedIn) {
+    if (!this._picture.isUserLoggedIn) {
       this._changePicture(
         UserAction.IF_NOT_LOGGED
       );
@@ -137,13 +136,13 @@ export class PicturePresenter {
     this._changePicture(
         UserAction.UPDATE_PICTURE,
         UpdateType.NONE,
-        update,
+        this._deleteUserData(update),
         UserDataKey.LIKED_PIC
     );
   }
 
   _handleFavoriteClick(update) {
-    if (!this._isUserLoggedIn) {
+    if (!this._picture.isUserLoggedIn) {
       this._changePicture(
         UserAction.IF_NOT_LOGGED
       );
@@ -153,7 +152,7 @@ export class PicturePresenter {
     this._changePicture(
       UserAction.UPDATE_USER,
       UpdateType.NONE,
-      update,
+      this._deleteUserData(update),
       UserDataKey.FAVORITE_PIC,
     );
   }
@@ -166,4 +165,24 @@ export class PicturePresenter {
     this._commentsSectionPresenter = new CommentsSectionPresenter(this._socialBlockContainer, this._userModel, this._changeMode);
     this._commentsSectionPresenter.init(this._picture);
   }
+
+  _modifyPictureDataWithUserData(picture, user) {
+    return Object.assign({}, picture, {
+      isUserLoggedIn: user !== null,
+      isChangeable: this._userModel.checkIfUserCanChangePicture(picture),
+      isLiked: user ? user.likedPic.some((item) => item === picture.id) : false,
+      isFavorite: user ? user.favoritePic.some((item) => item === picture.id) : false,
+    })
+  }
+
+  _deleteUserData(picture) {
+      const adaptedData = Object.assign({}, picture);
+
+      delete adaptedData.isUserLoggedIn;
+      delete adaptedData.isChangeable;
+      delete adaptedData.isLiked;
+      delete adaptedData.isFavorite;
+
+      return adaptedData;
+    }
 }

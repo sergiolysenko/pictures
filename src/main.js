@@ -1,3 +1,4 @@
+import regeneratorRuntime from "regenerator-runtime";
 import "tailwindcss/tailwind.css";
 import "./img/logo-pictures.png";
 import "./img/default-user-avatar.png";
@@ -36,6 +37,13 @@ const handleSiteHeaderClick = (menuItem) => {
     case MenuItem.SING_IN:
       authPresenter.showSignIn();
       break;
+    case MenuItem.PROFILE:
+      initProfilePage();
+      break;
+    case MenuItem.MAIN:
+      boardPresenter.destroyProfilePage();
+      initMainPage();
+      break;
   }
 };
 
@@ -44,8 +52,8 @@ const picturesModel = new PicturesModel();
 const siteHeaderPresenter = new SiteHeaderPresenter(headerContainer, handleSiteHeaderClick);
 const boardPresenter = new BoardPresenter(picturesListContainer, picturesModel, userModel);
 
-const initApp = () => {
-  siteHeaderPresenter.init(userModel);
+const initMainPage = () => {
+  siteHeaderPresenter.init(userModel, MenuItem.MAIN);
   authPresenter.showLoading(picturesListContainer);
 
   ContentDataApi.getPictures(userModel.getUser())
@@ -55,18 +63,32 @@ const initApp = () => {
   });
 }
 
+const initProfilePage = () => {
+  siteHeaderPresenter.init(userModel, MenuItem.PROFILE);
+  authPresenter.showLoading(picturesListContainer);
+  boardPresenter.clearBoard();
+
+  ContentDataApi.getUserPictures(userModel.getUser())
+  .then((pictures) => {
+    picturesModel.setUserPictures(UpdateType.NONE, pictures);
+    boardPresenter.renderProfilePage();
+    authPresenter.destroyLoading();
+  })
+}
+
 firebase.auth().onAuthStateChanged((user) => {
   if (user) {
     authPresenter.destroyAuthComponent();
     UserApi.getUserData(user)
     .then((userData) => {
       userModel.setUser(userData);
-      initApp();
+      initMainPage();
     });
   }
   else {
     userModel.setUser(null);
-    initApp();
+    boardPresenter.destroyProfilePage();
+    initMainPage();
   }
 })
 

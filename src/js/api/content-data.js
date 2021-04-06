@@ -3,6 +3,7 @@ import {uuidv4} from "../utils/common.js";
 import "firebase/firestore";
 import "firebase/storage";
 import "firebaseui/dist/firebaseui.css";
+import { UserDataKey } from "../const.js";
 
 const PICTURE_COLLECTION = 'pictures';
 const COMMENTS_COLLECTION = 'comments';
@@ -21,6 +22,25 @@ class ContentDataApi {
           return this.adaptPictureDataToClient(picture, user);
         })
       )
+  }
+
+  getPictureById(id, user) {
+    return this._picturesCollection.doc(id).get()
+    .then((response) => this.adaptPictureDataToClient(response, user));
+  }
+
+  async getUserPictures(user) {
+    const getUserPicturesByKey = (key, user) => {
+      return Promise.all(user[key].map((pictureId) => {
+        return this.getPictureById(pictureId, user)
+      }));
+    }
+
+    return {
+      loadedPic: await getUserPicturesByKey(UserDataKey.LOADED_PIC, user),
+      likedPic: await getUserPicturesByKey(UserDataKey.LIKED_PIC, user),
+      favoritePic: await getUserPicturesByKey(UserDataKey.FAVORITE_PIC, user)
+    }
   }
 
   deletePicture(picture) {
@@ -90,8 +110,6 @@ class ContentDataApi {
         picture.data(),
         {
           id: picture.id,
-          isLiked: user ? user.likedPic.some((item) => item === picture.id) : false,
-          isFavorite: user ? user.favoritePic.some((item) => item === picture.id) : false,
         }
       )
   }
@@ -100,9 +118,6 @@ class ContentDataApi {
     const adaptedData = Object.assign({}, data, user ? {
       author: user.name,
     } : {});
-
-    delete adaptedData.isLiked;
-    delete adaptedData.isFavorite;
     delete adaptedData.id;
 
     return adaptedData;

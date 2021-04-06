@@ -1,7 +1,7 @@
 import { AbstractView } from "./abstract.js";
 
-const createPictureTemplate = (picture, isChangeable) => {
-  const {src, title, author} = picture;
+const createPictureTemplate = (picture) => {
+  const {src, title, author, isChangeable} = picture;
 
   return `<section class="picture relative">
   <div class="grid">
@@ -26,16 +26,15 @@ const createPictureTemplate = (picture, isChangeable) => {
 }
 
 export class PictureView extends AbstractView {
-  constructor(picture, isChangeable) {
+  constructor(picture) {
     super();
     this._picture = picture;
-    this._isChangeable = isChangeable;
 
     this._editClickHandler = this._editClickHandler.bind(this);
   }
 
   getTemplate() {
-    return createPictureTemplate(this._picture, this._isChangeable);
+    return createPictureTemplate(this._picture);
   }
 
   _editClickHandler(evt) {

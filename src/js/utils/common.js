@@ -3,3 +3,7 @@ export const uuidv4 = () => {
     (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
   );
 }
+
+export const deleteElementFromArray = (array, element) => {
+  return array.filter((item) => item.id !== element.id);
+}

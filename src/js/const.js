@@ -8,13 +8,13 @@ export const UpdateType = {
 
 export const UserAction = {
   IF_NOT_LOGGED: `IF_NOT_LOGGED`,
-  UPDATE_PICTURE: `UPDATE_PICTURE`,
-  UPDATE_USER: `UPDATE_USER`,
-  UPDATE_COMMENT: `UPDATE_COMMENT`,
-  LOAD_PICTURE: `LOAD_PICTURE`,
   ADD_COMMENT: `ADD_COMMENT`,
   DELETE_PICTURE: `DELETE_PICTURE`,
   DELETE_COMMENT: `DELETE_COMMENT`,
+  LOAD_PICTURE: `LOAD_PICTURE`,
+  UPDATE_COMMENT: `UPDATE_COMMENT`,
+  UPDATE_PICTURE: `UPDATE_PICTURE`,
+  UPDATE_USER: `UPDATE_USER`,
 };
 
 export const UserDataKey = {
@@ -26,7 +26,15 @@ export const UserDataKey = {
 };
 
 export const MenuItem = {
-  LOAD_PICTURE: `LOAD_PICTURE`,
+  MAIN: `MAIN`,
   PROFILE: `PROFILE`,
+  LOAD_PICTURE: `LOAD_PICTURE`,
   SING_OUT: `SING_OUT`,
+  SING_OUT: `SING_IN`,
+}
+
+export const SectionTitle = {
+  LOADED_PIC: `Loaded pictures`,
+  LIKED_PIC: `Liked pictures`,
+  FAVORITE_PIC: `Favorite pictures`,
 }
