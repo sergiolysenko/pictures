@@ -1,10 +1,11 @@
+import authPresenter from "./auth.js";
+import {CommentsSectionPresenter} from "./comments.js";
 import {PictureView} from "../view/picture.js";
+import {ImgViewerView} from "../view/picture-img-viewer.js";
 import {NewPictureView} from "../view/new-picture.js";
 import {SocialBlockView} from "../view/social-block.js";
 import {render, remove, RenderPosition, replace} from "../utils/render.js";
 import {UpdateType, UserAction, UserDataKey} from "../const.js";
-import {CommentsSectionPresenter} from "./comments.js";
-import authPresenter from "./auth.js";
 
 const Mode = {
   DEFAULT: `DEFAULT`,
@@ -30,6 +31,8 @@ export class PicturePresenter {
     this._handleDeleteClick = this._handleDeleteClick.bind(this);
     this._handleLikeClick = this._handleLikeClick.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
+    this._handlePictureClick = this._handlePictureClick.bind(this);
+    this._handlePictureViewerClick = this._handlePictureViewerClick.bind(this);
   }
 
   init(picture) {
@@ -46,6 +49,7 @@ export class PicturePresenter {
     this._socialBlockContainer = this._pictureComponent.getElement().querySelector('.social-block-wrapper');
 
     this._pictureComponent.setEditClickHandler(this._handleEditClick);
+    this._pictureComponent.setPictureClickHandler(this._handlePictureClick);
     this._socialBlockComponent.setLikeClickHandler(this._handleLikeClick);
     this._socialBlockComponent.setFavoriteClickHandler(this._handleFavoriteClick);
     this._pictureEditComponent.setSubmitHandler(this._handleFormSubmit);
@@ -96,6 +100,17 @@ export class PicturePresenter {
   _replaceEditToPicture() {
     replace(this._pictureEditComponent, this._pictureComponent);
     this._mode = Mode.DEFAULT;
+  }
+
+  _handlePictureClick() {
+    const imgViewContainer = document.querySelector('body');
+    this._imgViewerComponent = new ImgViewerView(this._picture);
+    this._imgViewerComponent.setPictureViewerClickHandler(this._handlePictureViewerClick);
+    render(imgViewContainer, this._imgViewerComponent, RenderPosition.AFTERBEGIN);
+  }
+
+  _handlePictureViewerClick() {
+    remove(this._imgViewerComponent);
   }
 
   _handleEditClick() {
