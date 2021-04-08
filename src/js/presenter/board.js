@@ -19,6 +19,7 @@ export class BoardPresenter {
     this._currentPage = MenuItem.MAIN;
     this._renderedPicturesCount = RENDERED_PICTURES_PER_STEP;
 
+    this._observerTarget = document.querySelector('.footer');
     this._favoritesSectionComponent = new profileSectionView({title: SectionTitle.FAVORITE_PIC});
     this._likedSectionComponent = new profileSectionView({title: SectionTitle.LIKED_PIC});
     this._loadedSectionComponent = new profileSectionView({title: SectionTitle.LOADED_PIC});
@@ -26,12 +27,14 @@ export class BoardPresenter {
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
     this._handleModelEvent = this._handleModelEvent.bind(this);
+    this._creatPicturesInPageEnd = this._creatPicturesInPageEnd.bind(this);
 
     this._noAccessAlertComponent = new NoAccessAlertView();
     this._newPicturePresenter = new NewPicturePresenter(this._boardContainer, this._handleViewAction, this._userModel);
 
     this._picturesModel.addObserver(this._handleModelEvent);
     this._userModel.addObserver(this._handleModelEvent);
+    this._intersectionObserver = new IntersectionObserver(this._creatPicturesInPageEnd);
   }
 
   init() {
@@ -96,29 +99,23 @@ export class BoardPresenter {
     const renderedPicturesOnStart = pictures.slice(0, Math.min(picturesCount, RENDERED_PICTURES_PER_STEP));
     this._renderPictures(renderedPicturesOnStart, this._boardContainer);
 
-    this.initIntersectionObserver();
+    this._intersectionObserver.observe(this._observerTarget);;
   }
 
-  initIntersectionObserver() {
-    const creatPicturesInPageEnd = (entries) => {
-      if (entries[0].isIntersecting) {
-        const picturesCount = this._picturesModel.getPictures().length;
-        const newRenderedPicturesCount = Math.min(picturesCount, this._renderedPicturesCount + RENDERED_PICTURES_PER_STEP);
-        const pictures = this._picturesModel.getPictures()
-          .slice(this._renderedPicturesCount, newRenderedPicturesCount);
+  _creatPicturesInPageEnd(entries) {
+    if (entries[0].isIntersecting) {
+      const picturesCount = this._picturesModel.getPictures().length;
+      const newRenderedPicturesCount = Math.min(picturesCount, this._renderedPicturesCount + RENDERED_PICTURES_PER_STEP);
+      const pictures = this._picturesModel.getPictures()
+        .slice(this._renderedPicturesCount, newRenderedPicturesCount);
 
-        this._renderPictures(pictures, this._boardContainer)
-        this._renderedPicturesCount += RENDERED_PICTURES_PER_STEP;
+      this._renderPictures(pictures, this._boardContainer)
+      this._renderedPicturesCount += RENDERED_PICTURES_PER_STEP;
 
-        if (this._renderedPicturesCount >= picturesCount) {
-          observer.unobserve(target);
-        }
+      if (this._renderedPicturesCount >= picturesCount) {
+        this._intersectionObserver.unobserve(this._observerTarget);
       }
     }
-
-    const target = document.querySelector('.footer');
-    const observer = new IntersectionObserver(creatPicturesInPageEnd);
-    observer.observe(target);
   }
 
   clearBoard() {
@@ -126,7 +123,8 @@ export class BoardPresenter {
 
     Object.values(this._picturePresenter)
       .forEach((presenter) => presenter.destroy());
-      this._renderedPicturesCount = RENDERED_PICTURES_PER_STEP;
+    this._renderedPicturesCount = RENDERED_PICTURES_PER_STEP;
+    this._intersectionObserver.unobserve(this._observerTarget);
     this._picturePresenter = {};
   }
 
