@@ -9,7 +9,7 @@ const createSiteHeaderTemplate = (user, isMainPage) => {
           <div class="flex-shrink-0 flex items-center">
             <a
               ${isMainPage ? `` : `href="#"`} class="logo-menu-main">
-              <img class="block h-10 w-auto" src="./img/logo-pictures.png" alt="photos">
+              <img class="block h-10 w-auto" width="30" height="30" src="./img/logo-pictures.png" alt="photos">
             </a>
             <p class="hidden ml-2 w-auto text-2xl text-white font-brushwell sm:block md:text-3xl">Share your pictures - share your
               mood!</p>

@@ -14,7 +14,7 @@ const createNewPictureTemplate = (picture) => {
   <form class="bg-white h-full p7 rounded-lg mx-auto">
     <div class="h-full relative flex flex-col p-4 pb-3 text-gray-400 border border-gray-200 rounded-lg">
         <div class="h-full mb-3 relative flex flex-col justify-center text-gray-400 border border-gray-200 border-dashed rounded">
-            <input accept="*" type="file" multiple class="img-input absolute inset-0 z-10 w-full h-50 p-0 m-0 outline-none opacity-0 ${id ? "" : "cursor-pointer"}" ${id ? "disabled" : ""}/>
+            <input accept=".jpg, .jpeg, .png" type="file" multiple class="img-input absolute inset-0 z-10 w-full h-50 p-0 m-0 outline-none opacity-0 ${id ? "" : "cursor-pointer"}" ${id ? "disabled" : ""}/>
             ${src ? `
                 <img src=${src} class="object-cover w-full h-full rounded" />
               ` :

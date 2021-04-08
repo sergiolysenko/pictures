@@ -5,7 +5,7 @@ const createImgViewerTemplate = (picture) => {
 
   return `<div class="picture-viewer">
     <div class="fixed h-screen w-screen flex z-50 align-center justify-center">
-      <img src=${src} class="object-contain w-screen">
+      <img src=${src} class="object-contain w-screen" width="200" height="200">
     </div>
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 z-40"></div>
   </div>`
