@@ -8,6 +8,8 @@ import authPresenter from "./auth.js";
 import {UserAction, UpdateType, SectionTitle, MenuItem} from "../const.js";
 import {remove, render, RenderPosition} from "../utils/render.js";
 
+const RENDERED_PICTURES_PER_STEP = 6;
+
 export class BoardPresenter {
   constructor(boardContainer, picturesModel, userModel) {
     this._boardContainer = boardContainer;
@@ -15,6 +17,7 @@ export class BoardPresenter {
     this._picturesModel = picturesModel;
     this._userModel = userModel;
     this._currentPage = MenuItem.MAIN;
+    this._renderedPicturesCount = RENDERED_PICTURES_PER_STEP;
 
     this._favoritesSectionComponent = new profileSectionView({title: SectionTitle.FAVORITE_PIC});
     this._likedSectionComponent = new profileSectionView({title: SectionTitle.LIKED_PIC});
@@ -88,13 +91,34 @@ export class BoardPresenter {
   }
 
   _renderBoard() {
-    if (this._isLoading) {
-      this._renderLoading();
-      return;
+    const pictures = this._picturesModel.getPictures();
+    const picturesCount = pictures.length;
+    const renderedPicturesOnStart = pictures.slice(0, Math.min(picturesCount, RENDERED_PICTURES_PER_STEP));
+    this._renderPictures(renderedPicturesOnStart, this._boardContainer);
+
+    this.initIntersectionObserver();
+  }
+
+  initIntersectionObserver() {
+    const creatPicturesInPageEnd = (entries) => {
+      if (entries[0].isIntersecting) {
+        const picturesCount = this._picturesModel.getPictures().length;
+        const newRenderedPicturesCount = Math.min(picturesCount, this._renderedPicturesCount + RENDERED_PICTURES_PER_STEP);
+        const pictures = this._picturesModel.getPictures()
+          .slice(this._renderedPicturesCount, newRenderedPicturesCount);
+
+        this._renderPictures(pictures, this._boardContainer)
+        this._renderedPicturesCount += RENDERED_PICTURES_PER_STEP;
+
+        if (this._renderedPicturesCount >= picturesCount) {
+          observer.unobserve(target);
+        }
+      }
     }
 
-    const pictures = this._picturesModel.getPictures();
-    this._renderPictures(pictures, this._boardContainer);
+    const target = document.querySelector('.footer');
+    const observer = new IntersectionObserver(creatPicturesInPageEnd);
+    observer.observe(target);
   }
 
   clearBoard() {
@@ -102,7 +126,7 @@ export class BoardPresenter {
 
     Object.values(this._picturePresenter)
       .forEach((presenter) => presenter.destroy());
-
+      this._renderedPicturesCount = RENDERED_PICTURES_PER_STEP;
     this._picturePresenter = {};
   }
 

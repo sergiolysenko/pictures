@@ -91,11 +91,3 @@ firebase.auth().onAuthStateChanged((user) => {
     initMainPage();
   }
 })
-
-
-
-
-
-
-
-
