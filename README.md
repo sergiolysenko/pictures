@@ -1,5 +1,5 @@
-#pictures
-##JS, tailwindcss, firebase, webpack
+# pictures
+## JS, tailwindcss, firebase, webpack
 
 - Любоый пользователь может:
   - Просматривать картинки
