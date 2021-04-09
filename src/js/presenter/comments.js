@@ -18,20 +18,21 @@ export class CommentsSectionPresenter {
     this._commentsWrapper = commentsWrapper;
     this._changeMode = changeMode;
     this._userModel = userModel;
-
+    this._isCommentsOpen = false;
     this._renderedCommentsCount = COMMENTS_COUNT_PER_STEP;
     this._commentComponent = {};
-    this._isCommentsOpen = false;
 
     this._commentsSectionComponent = null;
     this._commentsModel = new CommentsModel();
     this._commentsButtonComponent = new CommentsButtonView();
 
-    this._handleCommentsClick = this._handleCommentsClick.bind(this);
+    this._handleShowCommentsClick = this._handleShowCommentsClick.bind(this);
     this._handleShowMoreCommentsClick = this._handleShowMoreCommentsClick.bind(this);
     this._handleCommentsViewAction = this._handleCommentsViewAction.bind(this);
     this._handleCommentsModelEvent = this._handleCommentsModelEvent.bind(this);
+    this.clearCommentsSection = this.clearCommentsSection.bind(this);
 
+    this._commentsButtonComponent.setCommentsButtonHandler(this._handleShowCommentsClick);
     this._commentsModel.addObserver(this._handleCommentsModelEvent);
   }
 
@@ -39,8 +40,6 @@ export class CommentsSectionPresenter {
     this._picture = picture;
 
     render(this._commentsWrapper, this._commentsButtonComponent, RenderPosition.BEFOREEND);
-
-    this._commentsButtonComponent.setCommentsButtonHandler(this._handleCommentsClick);
   }
 
   destroy() {
@@ -48,10 +47,6 @@ export class CommentsSectionPresenter {
     this.clearCommentsSection();
     this._commentsModel.removeObserver(this._handleCommentsModelEvent);
     this._commentComponent = {};
-  }
-
-  _getComments() {
-    return this._commentsModel.getComments();
   }
 
   clearCommentsSection({resetRenderedCoomentsCount = true} = {}) {
@@ -74,6 +69,10 @@ export class CommentsSectionPresenter {
     }
   }
 
+  _getComments() {
+    return this._commentsModel.getComments();
+  }
+
   _loadPictureComments(currentPicture) {
     this._user = this._userModel.getUser();
 
@@ -81,17 +80,6 @@ export class CommentsSectionPresenter {
       .then((comments) => {
         this._commentsModel.setComments(UpdateType.INIT, comments);
       })
-  }
-
-  _handleCommentsClick() {
-    if (this._isCommentsOpen) {
-      this.clearCommentsSection();
-    } else {
-      this._changeMode();
-      authPresenter.showLoading(this._commentsButtonComponent, {isSmall: true})
-      this._isCommentsOpen = true;
-      this._loadPictureComments(this._picture);
-    }
   }
 
   updateUserData(updateType, update, userDataKeyUpdate) {
@@ -103,6 +91,59 @@ export class CommentsSectionPresenter {
     return UserApi.updateUserData(newUserData).then(() => {
       this._userModel.updateUser(updateType, newUserData);
     });
+  }
+
+  _handleShowCommentsClick() {
+    if (this._isCommentsOpen) {
+      this.clearCommentsSection();
+    } else {
+      this._changeMode();
+      authPresenter.showLoading(this._commentsButtonComponent, {isSmall: true})
+      this._isCommentsOpen = true;
+      this._loadPictureComments(this._picture);
+    }
+  }
+
+  _renderComment(comment) {
+    const commentComponent = new CommentView(comment, this._userModel);
+    commentComponent.setLikeClickHandler(this._handleCommentsViewAction);
+    commentComponent.setDeleteHandler(this._handleCommentsViewAction);
+    const commentsList = this._commentsWrapper.querySelector('.comments-list');
+    render(commentsList, commentComponent, RenderPosition.BEFOREEND);
+
+    this._commentComponent[comment.id] = commentComponent;
+  }
+
+  _renderComments(comments) {
+    comments.forEach((comment) => this._renderComment(comment))
+  }
+
+  _renderCommentsSection() {
+    this._isCommentsOpen = true;
+    this._commentsButtonComponent.updateData({isCommentsOpen: true})
+    this._noCommentsComponent = new NoCommentsView();
+    this._showMoreCommentsComponent = new ShowMoreCommentsView();
+    this._commentsContainerComponent = new CommentsContainerView();
+    this._commentsSectionComponent = new CommentsSectionView(this._user);
+
+    const comments = this._getComments();
+    const commentsCount = comments.length;
+
+    this._commentsSectionComponent.setSubmitHandler(this._handleCommentsViewAction);
+
+    render(this._commentsWrapper, this._commentsContainerComponent, RenderPosition.BEFOREEND);
+    render(this._commentsContainerComponent, this._commentsSectionComponent, RenderPosition.BEFOREEND);
+
+    if(!commentsCount) {
+      this._renderNoComments();
+      return;
+    }
+
+    this._renderComments(comments.slice(0, Math.min(commentsCount, this._renderedCommentsCount)));
+
+    if (commentsCount > this._renderedCommentsCount) {
+      this._renderShowMoreCommentsButton();
+    }
   }
 
   _handleCommentsViewAction(actionType, updateType, update, userDataKeyUpdate) {
@@ -171,6 +212,10 @@ export class CommentsSectionPresenter {
     }
   }
 
+  _renderNoComments() {
+    render(this._commentsContainerComponent, this._noCommentsComponent, RenderPosition.AFTERBEGIN);
+  }
+
   _handleShowMoreCommentsClick() {
     const commentsCount = this._getComments().length;
     const newRenderedCommentsCount = Math.min(commentsCount, this._renderedCommentsCount + COMMENTS_COUNT_PER_STEP);
@@ -184,20 +229,6 @@ export class CommentsSectionPresenter {
     }
   }
 
-  _renderComment(comment) {
-    const commentComponent = new CommentView(comment, this._userModel);
-    commentComponent.setLikeClickHandler(this._handleCommentsViewAction);
-    commentComponent.setDeleteHandler(this._handleCommentsViewAction);
-    const commentsList = this._commentsWrapper.querySelector('.comments-list');
-    render(commentsList, commentComponent, RenderPosition.BEFOREEND);
-
-    this._commentComponent[comment.id] = commentComponent;
-  }
-
-  _renderComments(comments) {
-    comments.forEach((comment) => this._renderComment(comment))
-  }
-
   _renderShowMoreCommentsButton() {
     const commentsList = this._commentsWrapper.querySelector('.comments-list');
     const showMorebuttonContainer = commentsList.parentNode;
@@ -205,37 +236,5 @@ export class CommentsSectionPresenter {
     this._showMoreCommentsComponent.setClickHandler(this._handleShowMoreCommentsClick);
 
     render(showMorebuttonContainer, this._showMoreCommentsComponent, RenderPosition.BEFOREEND);
-  }
-
-  _renderNoComments() {
-    render(this._commentsContainerComponent, this._noCommentsComponent, RenderPosition.AFTERBEGIN);
-  }
-
-  _renderCommentsSection() {
-    this._isCommentsOpen = true;
-    this._commentsButtonComponent.updateData({isCommentsOpen: true})
-    this._noCommentsComponent = new NoCommentsView();
-    this._showMoreCommentsComponent = new ShowMoreCommentsView();
-    this._commentsContainerComponent = new CommentsContainerView();
-    this._commentsSectionComponent = new CommentsSectionView(this._user);
-
-    const comments = this._getComments();
-    const commentsCount = comments.length;
-
-    this._commentsSectionComponent.setSubmitHandler(this._handleCommentsViewAction);
-
-    render(this._commentsWrapper, this._commentsContainerComponent, RenderPosition.BEFOREEND);
-    render(this._commentsContainerComponent, this._commentsSectionComponent, RenderPosition.BEFOREEND);
-
-    if(!commentsCount) {
-      this._renderNoComments();
-      return;
-    }
-
-    this._renderComments(comments.slice(0, Math.min(commentsCount, this._renderedCommentsCount)));
-
-    if (commentsCount > this._renderedCommentsCount) {
-      this._renderShowMoreCommentsButton();
-    }
   }
 }

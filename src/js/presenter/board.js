@@ -1,7 +1,7 @@
 import {NewPicturePresenter} from "./new-picture.js";
 import {NoAccessAlertView} from "../view/no-access-alert.js";
 import {PicturePresenter} from "./picture.js";
-import {profileSectionView} from "../view/profile-section";
+import {ProfileSectionView} from "../view/profile-section";
 import ContentDataApi from "../api/content-data.js";
 import UserApi from "../api/user.js";
 import authPresenter from "./auth.js";
@@ -13,16 +13,16 @@ const RENDERED_PICTURES_PER_STEP = 6;
 export class BoardPresenter {
   constructor(boardContainer, picturesModel, userModel) {
     this._boardContainer = boardContainer;
-    this._picturePresenter = {};
     this._picturesModel = picturesModel;
     this._userModel = userModel;
     this._currentPage = MenuItem.MAIN;
     this._renderedPicturesCount = RENDERED_PICTURES_PER_STEP;
+    this._picturePresenter = {};
 
     this._observerTarget = document.querySelector('.footer');
-    this._favoritesSectionComponent = new profileSectionView({title: SectionTitle.FAVORITE_PIC});
-    this._likedSectionComponent = new profileSectionView({title: SectionTitle.LIKED_PIC});
-    this._loadedSectionComponent = new profileSectionView({title: SectionTitle.LOADED_PIC});
+    this._favoritesSectionComponent = new ProfileSectionView({title: SectionTitle.FAVORITE_PIC});
+    this._likedSectionComponent = new ProfileSectionView({title: SectionTitle.LIKED_PIC});
+    this._loadedSectionComponent = new ProfileSectionView({title: SectionTitle.LOADED_PIC});
 
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleViewAction = this._handleViewAction.bind(this);
@@ -62,6 +62,16 @@ export class BoardPresenter {
     this._currentPage = MenuItem.MAIN;
   }
 
+  clearBoard() {
+    this._newPicturePresenter.destroy();
+
+    Object.values(this._picturePresenter)
+      .forEach((presenter) => presenter.destroy());
+    this._renderedPicturesCount = RENDERED_PICTURES_PER_STEP;
+    this._intersectionObserver.unobserve(this._observerTarget);
+    this._picturePresenter = {};
+  }
+
   _renderSection(pictures, sectionComponent) {
     if (!pictures.length) {
       return;
@@ -69,13 +79,6 @@ export class BoardPresenter {
     const profilePageContainer = document.querySelector('.profile-page');
     this._renderPictures(pictures, sectionComponent);
     render(profilePageContainer, sectionComponent, RenderPosition.BEFOREEND);
-  }
-
-  _handleModeChange() {
-    this._newPicturePresenter.destroy();
-    Object
-      .values(this._picturePresenter)
-      .forEach((presenter) => presenter.resetView());
   }
 
   _renderPicture(picture, container) {
@@ -118,16 +121,6 @@ export class BoardPresenter {
     }
   }
 
-  clearBoard() {
-    this._newPicturePresenter.destroy();
-
-    Object.values(this._picturePresenter)
-      .forEach((presenter) => presenter.destroy());
-    this._renderedPicturesCount = RENDERED_PICTURES_PER_STEP;
-    this._intersectionObserver.unobserve(this._observerTarget);
-    this._picturePresenter = {};
-  }
-
   updateUserData(updateType, update, userDataKeyUpdate) {
     if(!userDataKeyUpdate) {
       return;
@@ -141,6 +134,13 @@ export class BoardPresenter {
       authPresenter.destroyLoading();
       authPresenter.showErrorAlert();
     });
+  }
+
+  _handleModeChange() {
+    this._newPicturePresenter.destroy();
+    Object
+      .values(this._picturePresenter)
+      .forEach((presenter) => presenter.resetView());
   }
 
   _handleViewAction(actionType, updateType, update, userDataKeyUpdate) {

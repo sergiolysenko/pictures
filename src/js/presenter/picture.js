@@ -91,6 +91,15 @@ export class PicturePresenter {
     }
   }
 
+  _renderSocialSection() {
+    render(this._socialBlockContainer, this._socialBlockComponent, RenderPosition.BEFOREEND);
+  }
+
+  _renderCommentsSection() {
+    this._commentsSectionPresenter = new CommentsSectionPresenter(this._socialBlockContainer, this._userModel, this._changeMode);
+    this._commentsSectionPresenter.init(this._picture);
+  }
+
   _replacePictureToEdit() {
     replace(this._pictureComponent, this._pictureEditComponent);
     this._changeMode();
@@ -172,15 +181,6 @@ export class PicturePresenter {
     );
   }
 
-  _renderSocialSection() {
-    render(this._socialBlockContainer, this._socialBlockComponent, RenderPosition.BEFOREEND);
-  }
-
-  _renderCommentsSection() {
-    this._commentsSectionPresenter = new CommentsSectionPresenter(this._socialBlockContainer, this._userModel, this._changeMode);
-    this._commentsSectionPresenter.init(this._picture);
-  }
-
   _modifyPictureDataWithUserData(picture, user) {
     return Object.assign({}, picture, {
       isUserLoggedIn: user !== null,
@@ -191,13 +191,13 @@ export class PicturePresenter {
   }
 
   _deleteUserData(picture) {
-      const adaptedData = Object.assign({}, picture);
+    const adaptedData = Object.assign({}, picture);
 
-      delete adaptedData.isUserLoggedIn;
-      delete adaptedData.isChangeable;
-      delete adaptedData.isLiked;
-      delete adaptedData.isFavorite;
+    delete adaptedData.isUserLoggedIn;
+    delete adaptedData.isChangeable;
+    delete adaptedData.isLiked;
+    delete adaptedData.isFavorite;
 
-      return adaptedData;
-    }
+    return adaptedData;
+  }
 }

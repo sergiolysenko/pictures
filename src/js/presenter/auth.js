@@ -30,7 +30,6 @@ class AuthPresenter {
     this._authUiWrapperComponet.setCloseClickHandler(this._handleCloseAuthClick);
 
     render(this._mainContainer, this._authUiWrapperComponet, RenderPosition.AFTERBEGIN);
-
     AuthApi.showSignIn();
   }
 

@@ -8,7 +8,7 @@ const createSectionTemplate = (section) => {
   </div>`
 }
 
-export class profileSectionView extends AbstractView {
+export class ProfileSectionView extends AbstractView {
   constructor(section) {
     super();
 

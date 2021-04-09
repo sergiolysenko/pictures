@@ -35,7 +35,7 @@ const createComment = (comment, user, isUserCanDelete) => {
               </svg>` : ``}
             </div>
             <div  ${user ? `class="flex"` : "hidden"}>
-              <label class="cursor-pointer hover:underline">
+              <label class="cursor-pointer">
                 <input type="checkbox" href="#" class="comment-like hidden group" ${isLiked ? "checked" : ""}>
                 <small>Like</small>
               </label>
