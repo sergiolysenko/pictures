@@ -21,7 +21,10 @@ class ContentDataApi {
       .then((response) => response.docs.map((picture) => {
           return this.adaptPictureDataToClient(picture, user);
         })
-      )
+      ).catch((error) => {
+        console.log(error `has occured`);
+        return []
+      })
   }
 
   getPictureById(id, user) {
@@ -47,12 +50,17 @@ class ContentDataApi {
     return this._storage.refFromURL(picture.src)
     .delete().then(() => {
       this._picturesCollection.doc(picture.id).delete();
+    }).catch((error) => {
+      throw new Error(`Error while deleting, please try later. ${error}`);
     });
   }
 
   updatePicture(update) {
     return this._picturesCollection.doc(update.id)
-      .set(this.adaptPictureDataToServer(update));
+      .set(this.adaptPictureDataToServer(update))
+      .catch((error) => {
+        throw new Error(`Fail while updating picture! Please try later. ${error}`)
+      });
   }
 
   loadPicture(data, user) {
@@ -66,7 +74,9 @@ class ContentDataApi {
         .then((docRef) => docRef.get())
         .then((loadedData) => {
           return this.adaptPictureDataToClient(loadedData, user);
-        })
+        }).catch((error) => {
+          throw new Error(`Error while picture data! - ${error}`)
+        });
       });
   }
 
@@ -75,7 +85,9 @@ class ContentDataApi {
       .collection(COMMENTS_COLLECTION).get()
       .then((response) => response.docs.map((comment) => {
         return this.adaptCommentDataToClient(comment, user)
-      }));
+      })).catch((error) => {
+        throw new Error(`Error while getting comments, ${error}`)
+      });;
   }
 
   addComment(comment, picture, user) {
@@ -84,18 +96,26 @@ class ContentDataApi {
       .then((docRef) => docRef.get())
       .then((loadedData) => {
         return this.adaptCommentDataToClient(loadedData);
-      })
+      }).catch((error) => {
+        throw new Error(`Add comment error, ${error}`)
+      });
   }
 
   updateComment(update, picture) {
     return this._picturesCollection.doc(picture.id)
       .collection(COMMENTS_COLLECTION).doc(update.id)
-      .set(this.adaptCommentDataToServer(update));
+      .set(this.adaptCommentDataToServer(update))
+      .catch((error) => {
+        throw new Error(`Update comment error, ${error}`)
+      });;
   }
 
   deleteComment(comment, picture) {
     return this._picturesCollection.doc(picture.id)
-      .collection(COMMENTS_COLLECTION).doc(comment.id).delete();
+      .collection(COMMENTS_COLLECTION).doc(comment.id).delete()
+      .catch((error) => {
+        throw new Error(`Error while deleting comment, ${error}`)
+      });;
   }
 
   _uploadImgOnStorage(pictureSrc) {

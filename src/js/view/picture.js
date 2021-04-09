@@ -12,7 +12,7 @@ const createPictureTemplate = (picture) => {
           <path fill="white" d="M377.707,56.053L327.893,6.24c-8.32-8.32-21.867-8.32-30.187,0l-39.04,39.04l80,80l39.04-39.04 C386.027,77.92,386.027,64.373,377.707,56.053z"></path>
         </svg>
       </button>
-      <div class="picture-view-box w-full h-80 relative">
+      <div class="picture-view-box cursor-pointer w-full h-80 relative">
         <img src="${src}" alt="${title}" class="object-cover w-full h-full bg-gray-100 rounded-t-lg" width="100" height="100"/>
         <div class="absolute bottom-0 z-10 w-full px-4 pt-40 pb-3 bg-gradient-to-t from-black">
           <p class="text-sm font-medium text-white">${author}</p>

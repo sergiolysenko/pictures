@@ -3,7 +3,7 @@ import { AbstractView } from "./abstract";
 const createImgViewerTemplate = (picture) => {
   const {src} = picture;
 
-  return `<div class="picture-viewer">
+  return `<div class="picture-viewer cursor-pointer">
     <div class="fixed h-screen w-screen flex z-50 align-center justify-center">
       <img src=${src} class="object-contain w-screen" width="200" height="200">
     </div>

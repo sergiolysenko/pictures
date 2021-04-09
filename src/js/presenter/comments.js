@@ -114,7 +114,10 @@ export class CommentsSectionPresenter {
           this._commentsModel.updateComment(updateType, update);
           this.updateUserData(updateType, update, userDataKeyUpdate);
           authPresenter.destroyLoading();
-        })
+        }).catch(() => {
+          authPresenter.destroyLoading();
+          authPresenter.showErrorAlert();
+        });
         break;
 
       case UserAction.ADD_COMMENT:
@@ -125,7 +128,10 @@ export class CommentsSectionPresenter {
             this._commentsModel.addComment(updateType, loadedComment);
             authPresenter.destroyLoading();
           })
-        })
+        }).catch(() => {
+          authPresenter.destroyLoading();
+          authPresenter.showErrorAlert();
+        });
         break;
 
       case UserAction.DELETE_COMMENT:
@@ -135,6 +141,9 @@ export class CommentsSectionPresenter {
           this.updateUserData(UpdateType.NONE, update, userDataKeyUpdate);
           this._commentsModel.deleteComment(updateType, update);
           authPresenter.destroyLoading();
+        }).catch(() => {
+          authPresenter.destroyLoading();
+          authPresenter.showErrorAlert();
         });
         break;
     }

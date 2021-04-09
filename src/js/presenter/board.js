@@ -137,6 +137,9 @@ export class BoardPresenter {
     UserApi.updateUserData(newUserData).then(() => {
       this._userModel.updateUser(updateType, newUserData);
       authPresenter.destroyLoading();
+    }).catch(() => {
+      authPresenter.destroyLoading();
+      authPresenter.showErrorAlert();
     });
   }
 
@@ -152,7 +155,10 @@ export class BoardPresenter {
           this._picturesModel.updatePicture(updateType, update, userDataKeyUpdate);
           this.updateUserData(updateType, update, userDataKeyUpdate);
           authPresenter.destroyLoading();
-        })
+        }).catch(() => {
+          authPresenter.destroyLoading();
+          authPresenter.showErrorAlert();
+        });
         break;
 
       case UserAction.UPDATE_USER:
@@ -166,7 +172,10 @@ export class BoardPresenter {
             this._picturesModel.loadPicture(UpdateType.NONE, loadedData, userDataKeyUpdate);
             this.updateUserData(updateType, loadedData, userDataKeyUpdate);
             authPresenter.destroyLoading();
-          })
+          }).catch(() => {
+            authPresenter.destroyLoading();
+            authPresenter.showErrorAlert();
+          });
         break;
 
       case UserAction.DELETE_PICTURE:
@@ -175,7 +184,10 @@ export class BoardPresenter {
             this._picturesModel.deletePicture(updateType, update, userDataKeyUpdate);
             this.updateUserData(updateType, update, userDataKeyUpdate);
             authPresenter.destroyLoading();
-          })
+          }).catch(() => {
+            authPresenter.destroyLoading();
+            authPresenter.showErrorAlert();
+          });
         break;
     }
   }
